@@ -11,7 +11,7 @@
 #'
 #' (1) a matrix (\code{$p.true}) containing the true toxicity probabilities of the investigational dose levels.
 #'
-#' (2) a vector (\code{$p.true}) which specifies the true MTD.
+#' (2) a vector (\code{$mtd.true}) which specifies the true MTD.
 #'
 #' @export
 
