@@ -1,0 +1,83 @@
+---
+title: "Generate decision table for a single or multiple design(s)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Generate decision table for a single or multiple design(s)}
+  %\VignetteEngine{knitr::rmarkdown} 
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  collapse = TRUE
+)
+```
+
+In this vignette we will demonstrate how to use `FIND` package to generate decision tables for a single or multiple designs. 
+
+Begin by loading the `FIND` library and dependencies:
+
+```{r}
+library(FIND)
+# Dependencies
+library(ggplot2)
+library(dplyr)
+library(grid)
+library(gridExtra)
+library(gtable)
+```
+
+```{r}
+# Main directory
+mainDir <- "/Users/oliviazhang/Desktop/"
+
+# library(miceadds)
+# source.all(paste0(mainDir, "/FIND/R"))
+```
+
+
+We now turn our attention toward generate decision tables for the design(s) we chose. This involves two steps. 
+
+First, we call the `get.decision.x` functions, where we can replace `x` with the design names. The function will return the dosing decisions (E, S, D or DU) for the user-specified designs. 
+
+For example:
+
+```{r}
+decision_i3 <- get.decision.i3(pT = 0.25,
+                               EI = c(0.2,0.3),
+                               npatients = 12)
+
+decision_boin <- get.decision.b(pT = 0.25,
+                                EI = c(0.15,0.35),
+                                npatients = 12)
+
+decision_3 <- get.decision.3(npatients = 12)
+```
+
+Next, we call the `generate_decision_table` function, which will automatically generate the decision table. 
+
+```{r}
+plot <- generate_decision_table(#`3+3` = decision_3,
+                                `BOIN` = decision_boin)
+                                #`i3+3` = decision_i3)
+```
+
+We can also save the plot the local directory:
+```{r}
+# #Create a new directory named “Results”
+# new.folder <- "Results"
+# dir.create(file.path(mainDir, new.folder))
+# #Create a new sub-directory named “Decision Tables”
+# new.subfolder <- "Decision Tables"
+# dir.create(file.path(mainDir, new.folder, new.subfolder))
+# 
+# ggsave(paste0(file.path(mainDir, new.folder, new.subfolder),"/decision_table.jpg"),
+#        width = 18,
+#        height = 8,
+#        plot)
+```
+ 
+   

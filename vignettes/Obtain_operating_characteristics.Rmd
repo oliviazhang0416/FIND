@@ -1,0 +1,142 @@
+---
+title: "Obtain operating characteristics for a single or multiple design(s)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Obtain operating characteristics for a single or multiple design(s)} 
+  %\VignetteEngine{knitr::rmarkdown} 
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE
+)
+```
+
+In this vignette we will demonstrate how to use `FIND` package to compare the operating characteristics for a single or multiple designs. 
+
+Begin by loading the `FIND` library and dependencies:
+
+```{r}
+library(FIND)
+# Dependencies
+library(ggplot2)
+library(dplyr)
+library(grid)
+library(gridExtra)
+library(gtable)
+```
+
+```{r}
+# Main directory
+mainDir <- "/Users/oliviazhang/Desktop/"
+
+# library(miceadds)
+# source.all(paste0(mainDir, "/FIND/R"))
+```
+We provide several commonly used simulation scenarios.
+
+View by calling the `load.true` function:
+```{r}
+load.true(pT = 0.25)   
+```
+
+We will use the scenarios provided in FFP-BOIN submission:
+```{r}
+#Load the true toxicity rates
+p.true <- load.true(pT = 0.25)[["FFP-BOIN provided"]][["p.true"]]
+p.true
+```
+
+```{r}
+#Load the true MTD
+load.true(pT = 0.25)[["FFP-BOIN provided"]][["mtd.true"]]
+```
+
+```{r}
+# We need to specify which dose(s) is the true MTD for each scenario 
+# We will set up the following matrix:
+# Each row represents one scenario,
+# and 1 indicates that the dose is the true MTD for that scenario
+mtd.true <- matrix(c(1,0,0,0,0,0,
+                     0,1,0,0,0,0,
+                     0,0,1,0,0,0,
+                     0,0,0,1,0,0,
+                     0,0,0,0,1,0,
+                     0,0,0,0,0,1,
+                     0,0,0,0,0,0,
+                     1,0,0,0,0,0), nrow = 8, ncol = 6, byrow = T)
+```
+
+We now turn our attention toward obtaining the operating characteristic for the design(s) we chose. This involves two steps. 
+
+First, we call the `run.sim.x` functions, where we can replace `x` with the design names. The function will run the simulations and return operating charactertistics for the user-specified designs. 
+
+For example:
+
+```{r}
+# Run simulations for the 3+3 design
+oc_3plus3 <- run.sim.3(p.true = p.true,
+                       mtd.true = mtd.true, 
+                       startdose = 1,
+                       ntrial = 5000,
+                       seed = 6)
+
+# Run simulations for the BOIN design
+oc_boin <- run.sim.b(p.true = p.true,
+                     mtd.true = mtd.true, 
+                     pT = 0.25,
+                     EI = c(0.15,0.35),
+                     ncohort = 12,
+                     cohortsize = 3,
+                     startdose = 1,
+                     DU.pp = 0.95,
+                     n.earlystop = 12,
+                     extrasafe = F,
+                     ntrial = 5000,
+                     seed = 6)
+
+# Run simulations for the i3+3 design
+oc_i3plus3 <- run.sim.i3(p.true = p.true,
+                         mtd.true = mtd.true, 
+                         pT = 0.25,
+                         EI = c(0.2,0.3),
+                         ncohort = 12,
+                         cohortsize = 3,
+                         startdose = 1,
+                         DU.pp = 0.95,
+                         #n.earlystop = 12,
+                         extrasafe = T,
+                         ntrial = 5000,
+                         seed = 6)
+```
+
+Next, we call the `generate_oc_plot` function, which will automatically generate the plots of operating characteristics. 
+
+```{r}
+plot <- generate_oc_plot(`3+3` = oc_3plus3,
+                         `BOIN` = oc_boin,
+                         `i3+3` = oc_i3plus3)
+```
+
+We can also save the plot the local directory using `ggsave` function from ggplot:
+```{r}
+# #Create a new directory named “Results”
+# new.folder <- "Results"
+# dir.create(file.path(mainDir, new.folder))
+# #Create a new sub-directory named “Decision Tables”
+# new.subfolder <- "Operating Characteristics"
+# dir.create(file.path(mainDir, new.folder, new.subfolder))
+# 
+# ggsave(paste0(file.path(mainDir, new.folder, new.subfolder),"/oc_selection.jpg"),
+#        width = 12,
+#        height = 12,
+#        plot[[1]])
+# 
+# ggsave(paste0(file.path(mainDir, new.folder, new.subfolder),"/oc_allocation.jpg"),
+#        width = 12,
+#        height = 12,
+#        plot[[2]])
+```
+

@@ -1,0 +1,27 @@
+Package: FIND
+Type: Package
+Title: For INterval Designs: A R Package Aimed at Objectively Comparing Three Phase I Dose-Finding Trials: 3+3, i3+3, and BOIN
+Version: 0.1.0
+Author: Yuan Ji and Yunxuan Zhang
+Maintainer: Yunxuan Zhang <yunxuanz@uchicago.edu>
+Description: Compare decision tables and/or operating characteristics for the 3+3 Design, Bayesian Optimal INterval (BOIN) Design and Interval 3+3 (i3+3) Design.
+Encoding: UTF-8
+License: MIT + file LICENSE
+LazyData: true
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+VignetteBuilder: knitr
+RoxygenNote: 7.3.1
+Imports:
+    ggplot2,
+    grid,
+    gridExtra,
+    gtable,
+    reshape2,
+    dplyr,
+    rlang,
+    stats,
+    base
+Config/testthat/edition: 3
