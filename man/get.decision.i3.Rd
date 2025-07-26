@@ -6,28 +6,28 @@
 \usage{
 get.decision.i3(pT = NULL,
                        EI = NULL,
-                       npatients = 12)
+                       npts = 12)
 }
 \arguments{
 \item{pT}{a numeric value that specifies the target DLT rate (\eqn{p_T}).}
 
 \item{EI}{a vector that specifies the equivalence interval (EI).}
 
-\item{npatients}{the number of patients within which dosing decisions are generated.}
+\item{npts}{the number of participants within which dosing decisions are generated.}
 }
 \value{
 \code{get.decision.i3()} returns:
 
 (1) a dataframe containing the decisions (E, S, D or DU) for each combination of y and n (\code{$tab}),
 
-(2) a list (\code{$setup}) containing user input parameters, such as target, EI, npatients, etc.
+(2) a list (\code{$setup}) containing user input parameters, such as target, EI, npts, etc.
 }
 \description{
-Generate dosing decisions (E, S, D or DU) of the i3+3 design for user-specified number of patients.
+Generate dosing decisions (E, S, D or DU) of the i3+3 design for user-specified number of participants.
 }
 \details{
 Denote the current dose \eqn{d}. Let \eqn{n_d} and \eqn{y_d} represent the
-          number of patients treated at dose \eqn{d} and the number of patients
+          number of participants treated at dose \eqn{d} and the number of participants
           experienced DLT, respectively. Let \eqn{p_d} be the toxicity probability at
           dose \eqn{d}. Also, denote \eqn{\frac{y_d}{n_d}} the observed toxicity rate
           at the current dose.
@@ -54,7 +54,7 @@ Denote the current dose \eqn{d}. Let \eqn{n_d} and \eqn{y_d} represent the
 
 get.decision.i3(pT = 0.25,
                 EI = c(0.2,0.3),
-                npatients = 12)
+                npts = 12)
 }
 \references{
 Liu M., Wang, SJ. and Ji, Y. (2020). The i3+3 Design for Phase I Clinical Trials, \emph{Journal of

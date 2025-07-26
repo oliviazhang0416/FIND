@@ -3,29 +3,29 @@
 #'
 #' Conduct computer simulations for the BOIN design.
 #'
-#' @usage run.sim.b(p.true,
-#'                 mtd.true,
-#'                 pT,
-#'                 EI,
-#'                 ncohort,
-#'                 cohortsize = 3,
-#'                 startdose = 1,
-#'                 DU.pp = 0.95,
-#'                 n.earlystop = 100,
-#'                 extrasafe = FALSE,
-#'                 ntrial = 1000,
-#'                 seed = 6)
+#' @usage run.sim.boin(p.true,
+#'                     mtd.true,
+#'                     pT,
+#'                     EI,
+#'                     ncohort,
+#'                     cohortsize = 3,
+#'                     startdose = 1,
+#'                     DU.pp = 0.95,
+#'                     n.earlystop = 100,
+#'                     extrasafe = FALSE,
+#'                     ntrial = 1000,
+#'                     seed = 6)
 #'
 #' @param p.true a vector or matrix containing the true toxicity probabilities of the investigational dose levels.
 #' @param mtd.true a numeric value or a vector which specifies the true MTD.
-#' @param pT a numeric value; the pT DLT rate.
+#' @param pT a numeric value; the target DLT rate.
 #' @param EI a vector which specifies the equivalence interval (EI).
 #' @param ncohort a numeric value; the total number of cohorts.
 #' @param cohortsize a numeric value; the cohort size.
 #' @param startdose a numeric value; the starting dose level for the trial.
 #' @param DU.pp a numeric value; the cutoff to remove an overly toxic dose for safety.
 #'              We recommend the default value of (\code{DU.pp=0.95}) for general use.
-#' @param n.earlystop a numeric value; the early stopping parameter. If the number of patients
+#' @param n.earlystop a numeric value; the early stopping parameter. If the number of participants
 #'                    treated at the current dose reaches \code{n.earlystop},
 #'                    stop the trial and select the MTD based on the observed data.
 #'                    The default value \code{n.earlystop=100} essentially turns
@@ -35,7 +35,7 @@
 #' @param seed a numeric value; the random seed for simulation.
 #'
 #' @details Denote the current dose \eqn{d}. Let \eqn{n_d} and \eqn{y_d} represent the
-#'           number of patients treated at dose \eqn{d} and the number of patients
+#'           number of participants treated at dose \eqn{d} and the number of participants
 #'           experienced DLT, respectively. Let \eqn{p_d} be the toxicity probability at
 #'           dose \eqn{d}. Also, denote \eqn{\frac{y_d}{n_d}} the observed toxicity rate
 #'           at the current dose.
@@ -53,7 +53,7 @@
 #'
 #'           The BOIN design has two early stopping rules: (1) stop the trial if the lowest
 #'          dose is eliminated due to toxicity, and no dose should be selected as the MTD; and
-#'          (2) stop the trial and select the MTD if the number of patients treated at the current
+#'          (2) stop the trial and select the MTD if the number of participants treated at the current
 #'          dose reaches \code{n.earlystop}.
 #'
 #'          For some applications, investigators may prefer a more strict safety rule for MTD selection
@@ -76,47 +76,47 @@
 #' (2) a dataframe (\code{$allocation}) with each column showing:
 #'        the numbered index for each scenarios specified,
 #'        the name of the design,
-#'        the number of patients treated at each dose level,
-#'        the average number of patients treated,
+#'        the number of participants treated at each dose level,
+#'        the average number of participants treated,
 #'        the percentage of overdosing assignment (POA),
 #'        the percentage of correct assignment (PCA),
 #'        the percentage of underdosing assignment (PUA),
 #'        the numbered index for the true MTD, respectively.
 #'
-#' (3) a list (\code{$setup}) containing user input parameters, such as pT, EI, npatients, etc.
+#' (3) a list (\code{$setup}) containing user input parameters.
 #'
 #' @references Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I
 #'             Clinical Trials, \emph{Journal of the Royal Statistical Society: Series C}, 64, 507-523.
 #'
 #' @examples
-#' run.sim.b(p.true = c(0.25, 0.41, 0.45, 0.49, 0.53),
-#'           mtd.true = c(1,0,0,0,0),
-#'           pT = 0.25,
-#'           EI = c(0.15,0.35),
-#'           ncohort = 9,
-#'           cohortsize = 3,
-#'           startdose = 1,
-#'           DU.pp = 0.95,
-#'           n.earlystop = 100,
-#'           extrasafe = FALSE,
-#'           ntrial = 1000,
-#'           seed = 6)
+#' run.sim.boin(p.true = c(0.25, 0.41, 0.45, 0.49, 0.53),
+#'              mtd.true = c(1,0,0,0,0),
+#'              pT = 0.25,
+#'              EI = c(0.15,0.35),
+#'              ncohort = 9,
+#'              cohortsize = 3,
+#'              startdose = 1,
+#'              DU.pp = 0.95,
+#'              n.earlystop = 100,
+#'              extrasafe = FALSE,
+#'              ntrial = 1000,
+#'              seed = 6)
 #' @export
 #'
-run.sim.b <- function (p.true,
-                       mtd.true,
-                      pT,
-                      EI,
-                      ncohort,
-                      cohortsize = 3,
-                      startdose = 1,
-                      DU.pp = 0.95,
-                      n.earlystop = 100,
-                      extrasafe = FALSE,
-                      ntrial = 1000,
-                      seed = 6)
+run.sim.boin <- function (p.true,
+                          mtd.true,
+                          pT,
+                          EI,
+                          ncohort,
+                          cohortsize = 3,
+                          startdose = 1,
+                          DU.pp = 0.95,
+                          n.earlystop = 100,
+                          extrasafe = FALSE,
+                          ntrial = 1000,
+                          seed = 6)
 {
-  # check inputs
+  ############################## Check inputs ##############################
   if (is.matrix(p.true) & is.matrix(mtd.true)){
     if (nrow(p.true) == nrow(mtd.true) & ncol(p.true) == ncol(mtd.true)){
       # number of scenarios
@@ -162,30 +162,8 @@ run.sim.b <- function (p.true,
     warning("Warnings: the value of n.earlystop is too low to ensure good operating characteristics. Recommend n.earlystop = 9 to 18.")
   }
 
-
-  # Initialize matrix for storage
-  select.perc = matrix(rep(0, ndose * nscene), ncol = ndose)
-  stop.perc = rep(0, nscene)
-  nptsdose = matrix(rep(0, ndose * nscene), ncol = ndose)
-  npts = rep(0, nscene)
-
   ################################# Step 1 #################################
-  for (j in 1:nscene){
-    set.seed(seed)
-
-    p <- p.true[j,]
-
-  # number of doses
-  ndose = length(p)
-
-  # store Y and N
-  Y = matrix(rep(0, ndose * ntrial), ncol = ndose)
-  N = matrix(rep(0, ndose * ntrial), ncol = ndose)
-
-  # store MTD
-  MTD = rep(0, ntrial)
-
-  ################################# Step 2 #################################
+  ################### E, D Boundaries and Safety rule (dose exclusion) #####
   b.E <- c()
   b.D <- c()
   b.DU = c()
@@ -200,114 +178,118 @@ run.sim.b <- function (p.true,
       b.DU = c(b.DU, NA)
     }
     else {
-      ################# Safety rule (dose exclusion) ###################
-      for (y in 1:n) {
-        if (1 - pbeta(pT, y + 1, n - y + 1) > DU.pp) {
-          elimineed = 1
-          break
-        }
-      }
-      if (elimineed == 1) {
-        b.DU = c(b.DU, y)
-      }
-      else {
-        b.DU = c(b.DU, NA)
+      for (n in 1:n) {
+        # Vectorized pbeta calculation for all y values within the current n
+        y_ <- 0:n
+        p_ <- 1 - pbeta(pT, y_ + 1, n - y_ + 1)
+
+        # Find the first y that meets the condition, or NA if none do
+        y_DU <- y_[which(p_ > DU.pp)[1]]
+        b.DU[n] <- if (!is.na(y_DU)) {y_DU} else {NA}
       }
     }
   }
 
-  ##################################
   for (i in 1:length(b.D)) {
     if (!is.na(b.DU[i]) && (b.D[i] > b.DU[i]))
       b.D[i] = b.DU[i]
   }
 
   ############################## Step 2 #################################
-  for (trial in 1:ntrial) {
+  ################### Enumerate through scenarios #######################
 
-    y <- rep(0, ndose)
-    n <- rep(0, ndose)
+  # Initialize matrix for storage
+  select.perc = matrix(rep(0, ndose * nscene), ncol = ndose)
+  stop.perc = rep(0, nscene)
+  nptsdose = matrix(rep(0, ndose * nscene), ncol = ndose)
+  npts = rep(0, nscene)
 
-    d = startdose
-    earlystop = 0
-    elimi = rep(0, ndose)
+  for (j in 1:nscene){
+    set.seed(seed)
 
-    for (c in 1:ncohort) {
+    p <- p.true[j,]
 
-          new.DLT = runif(cohortsize) < p[d];
+    # store Y and N
+    Y = matrix(rep(0, ndose * ntrial), ncol = ndose)
+    N = matrix(rep(0, ndose * ntrial), ncol = ndose)
 
-          if((sum(n)+cohortsize) >= ncohort * cohortsize){
-            nremain = ncohort * cohortsize - sum(n);
-            y[d] = y[d] + sum(new.DLT[1:nremain]);
-            n[d] = n[d] + nremain;
-            break;
-          }
-          else{
-            ## Cumulative y and n
-            y[d] = y[d] + sum(new.DLT);
-            n[d] = n[d] + cohortsize;
-          }
+    # store MTD
+    MTD = rep(0, ntrial)
 
-          if (!is.na(b.DU[n[d]])) {
-            if (y[d] >= b.DU[n[d]]) {
+    ################### Trial simulation starts #######################
+    for (trial in 1:ntrial) {
 
-              # DU current and higher doses
-              elimi[d:ndose] = 1
+      y <- rep(0, ndose)
+      n <- rep(0, ndose)
 
-              if (d == 1) {
-                earlystop = 1
-                break
-              }
-            }}
+      d = startdose
+      earlystop = 0
+      elimi = rep(0, ndose)
 
-          ###### Early stop rule if n reaches xx ######
-          if(n[d]>=n.earlystop &&
-             (
-               (y[d]/n[d] > b.E[n[d]] && y[d]/n[d] <= b.D[n[d]]) ||
-               (d==1 && y[d]/n[d] > b.D[n[d]]) ||
-               ((d==ndose || elimi[d+1]==1) && y[d]/n[d] <= b.E[n[d]])
+      for (c in 1:ncohort) {
+
+        ### Generate random toxicity response ######
+        DLT = runif(cohortsize) < p[d];
+        y[d] = y[d] + sum(DLT);
+        n[d] = n[d] + cohortsize;
+
+        ###### DU current and higher doses ######
+        if (!is.na(b.DU[n[d]])) {
+          if (y[d] >= b.DU[n[d]]) {
+            elimi[d:ndose] = 1
+
+            if (d == 1) {
+              earlystop = 1
+              break;
+            }
+          }}
+        ###### Early stop rule if n reaches xx ######
+        if(n[d]>=n.earlystop &&
+           (
+             (y[d]/n[d] > b.E[n[d]] && y[d]/n[d] <= b.D[n[d]]) ||
+             (d==1 && y[d]/n[d] > b.D[n[d]]) ||
+             ((d==ndose || elimi[d+1]==1) && y[d]/n[d] <= b.E[n[d]])
              )
-          ) break;
-
-          # E
-          if (y[d]/n[d] <= b.E[n[d]] && d != ndose) {
-            if (elimi[d + 1] == 0)
-              d = d + 1
+           ) break;
+        # E
+        if (y[d]/n[d] <= b.E[n[d]] && d != ndose) {
+          if (elimi[d + 1] == 0)
+            d = d + 1
           }
-          # D
-          else if (y[d]/n[d] > b.D[n[d]] && d != 1) {
-              d = d - 1
+        # D
+        else if (y[d]/n[d] > b.D[n[d]] && d != 1) {
+          d = d - 1
           }
-          # S
-          else {
-            d = d
+        # S
+        else {
+          d = d
           }
-    }
-
-    ################################# Step 3 #################################
-    ## Select MTD
-    if (earlystop == 1) {
-      MTD[trial] = 99
-      }
-    else {
-      MTD[trial] = select.mtd(method = "BOIN",
-                              pT = pT,
-                              EI = EI,
-                              n_obs = n,
-                              y_obs = y,
-                              DU.pp = DU.pp,
-                              extrasafe = extrasafe)$d_selected
       }
 
-    Y[trial, ] = y
-    N[trial, ] = n
-    ##########################################################################################
+      ################################# Step 3 #################################
+      ############################### Select MTD ###############################
+      if (earlystop == 1) {
+        MTD[trial] = 99
+        }
+      else {
+        MTD[trial] = select.mtd(method = "BOIN",
+                                pT = pT,
+                                EI = EI,
+                                n_obs = n,
+                                y_obs = y,
+                                DU.pp = DU.pp,
+                                extrasafe = extrasafe)$d_selected
+        }
+
+      Y[trial, ] = y
+      N[trial, ] = n
   }
 
-  ################################# Step 4 #################################
-    nptsdose[j, ] = colMeans(N) #average number of patients
+    ################################# Step 4 #################################
+    ########################### Summarize metrics ############################
+    nptsdose[j, ] = colMeans(N) #average number of participants
     #nptsdose.perc = colMeans(N)/sum(colMeans(N))
-    npts[j] <- mean(rowSums(N)) #average total number of patients
+    npts[j] <- mean(rowSums(N)) #average total number of participants
 
     for (i in 1:ndose) {
       select.perc[j, i] = sum(MTD == i)/ntrial
@@ -316,27 +298,14 @@ run.sim.b <- function (p.true,
 
   }
 
-
-
   setup <- list(method = "BOIN",
                 startdose =  startdose,
                 cohortsize =  cohortsize,
                 ncohort =  ncohort,
-                pT = ifelse(!is.null( pT),
-                             pT,
-                            NA),
-                EI = c(ifelse(!is.null( EI[1]),
-                               EI[1],
-                              NA),
-                       ifelse(!is.null( EI[2]),
-                               EI[2],
-                              NA)),
-                boundary = c(ifelse(!is.null( EI[1]),
-                                    log((1 -  EI[1])/(1 -  pT))/log( pT * (1 -  EI[1])/( EI[1] * (1 -  pT))),
-                                    NA),
-                             ifelse(!is.null( EI[2]),
-                                    log((1 -  pT)/(1 -  EI[2]))/log( EI[2] * (1 -  pT)/( pT * (1 -  EI[2]))),
-                                    NA)),
+                pT = pT,
+                EI = EI,
+                boundary = c(log((1 -  EI[1])/(1 -  pT))/log( pT * (1 -  EI[1])/( EI[1] * (1 -  pT))),
+                             log((1 -  pT)/(1 -  EI[2]))/log( EI[2] * (1 -  pT)/( pT * (1 -  EI[2])))),
                 DU.pp =  DU.pp,
                 extrasafe =  extrasafe,
                 n.earlystop =  n.earlystop)

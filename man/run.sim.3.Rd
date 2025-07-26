@@ -37,12 +37,14 @@ run.sim.3(p.true,
 (2) a dataframe (\code{$allocation}) with each column showing:
        the numbered index for each scenarios specified,
        the name of the design,
-       the number of patients treated at each dose level,
-       the average number of patients treated,
+       the number of participants treated at each dose level,
+       the average number of participants treated,
        the percentage of overdosing assignment (POA),
        the percentage of correct assignment (PCA),
        the percentage of underdosing assignment (PUA),
        the numbered index for the true MTD, respectively.
+
+(3) a list (\code{$setup}) containing user input parameters.
 }
 \description{
 Conduct computer simulations for the 3+3 design.
@@ -50,18 +52,18 @@ Conduct computer simulations for the 3+3 design.
 \details{
 The 3+3 design uses the following decision rules.
 
-(1). Start trial by treating three patients at the initial dose.
+(1). Start trial by treating three participants at the initial dose.
 
-(2). Denote the dose level being used to treat patients as the current dose level.
-     Treat three patients at the current dose level.
+(2). Denote the dose level being used to treat participants as the current dose level.
+     Treat three participants at the current dose level.
 
-(3). Check the number of patients at the current dose level.
+(3). Check the number of participants at the current dose level.
 
-3a. If there are three patients, go to (4).
+3a. If there are three participants, go to (4).
 
-3b. If there are six patients, go to (5).
+3b. If there are six participants, go to (5).
 
-(4). Check the number of toxicities (among three patients) at the current dose level.
+(4). Check the number of toxicities (among three participants) at the current dose level.
 
 4a. If there are zero toxicities, escalate and go to (7).
 
@@ -69,7 +71,7 @@ The 3+3 design uses the following decision rules.
 
 4c. If there are two or three toxicities, declare that the MTD has been exceeded and go to (6).
 
-(5). Check the number of toxicities (among six patients) at the current dose level.
+(5). Check the number of toxicities (among six participants) at the current dose level.
 
 5a. If there are zero toxicities, stop the trial and declare that the MTD is the current dose.
 
@@ -83,8 +85,8 @@ the MTD is the current dose; otherwise, go to (7).
 6a. If the current dose is the lowest dose, stop the trial and declare that the MTD is lower than
 the lowest dose level.
 
-6b. If then next-lower dose level has six patients, stop the trial and declare that the MTD is the
-next lower dose level; otherwise, the next lower dose level has three patients; set the current dose
+6b. If then next-lower dose level has six participants, stop the trial and declare that the MTD is the
+next lower dose level; otherwise, the next lower dose level has three participants; set the current dose
 level to be the next-lower dose level and go to (2).
 
 (7). Escalate if possible.

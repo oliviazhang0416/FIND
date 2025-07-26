@@ -11,8 +11,8 @@
 #'
 #' @param select.perc the selection percentage for each dose.
 #' @param stop.perc the percentage of early stopping without selecting the MTD.
-#' @param nptsdose the number of patients treated for each dose.
-#' @param npts the average number of patients treated.
+#' @param nptsdose the number of participants treated for each dose.
+#' @param npts the average number of participants treated.
 #' @param mtd.true a vector (or a matrix) with the same dimension as
 #' the vector (or matrix) containing the true toxicity probabilities (\code{$p.true}).
 #' It should takes value of 0 or 1, and 1 specifies the true MTD.
@@ -29,11 +29,11 @@
 #'
 #' (2) a dataframe (\code{$allocation}) with each column showing:
 #'        the numbered index for each scenarios specified,
-#'        the number of patients treated at each dose level,
-#'        the average number of patients treated,
-#'        the percentage of overdosing assignment (POA),
-#'        the percentage of correct assignment (PCA),
-#'        the percentage of underdosing assignment (PUA), respectively.
+#'        the number of participants treated at each dose level,
+#'        the average number of participants treated,
+#'        the percentage of overdosing allocation (POA),
+#'        the percentage of correct allocation (PCA),
+#'        the percentage of underdosing allocation (PUA), respectively.
 #'
 #' @examples summarize.metric(select.perc = c(0.588, 0.218, 0.025, 0.0, 0.0, 0.0),
 #'                            stop.perc = 0.168,
@@ -73,68 +73,78 @@ summarize.metric <- function(select.perc,
   nptsdose.perc <- sweep(nptsdose, 1, npts, "/")
 
   for (j in 1:nscene){
+
+    ######## If no MTD ########
     if (sum(mtd.true[j, ]) == 0){
-      sel[j, ] <- c(select.perc[j, ] * 100, stop.perc[j] * 100,
-                    sum(select.perc[j, 1:ndose]) * 100, stop.perc[j] * 100, 0)
-      alo[j, ] <- c(nptsdose.perc[j, ] * 100, npts[j],
-                    sum(nptsdose.perc[j, 1:ndose]) * 100, 0, 0)
+      ######## MTD selection ########
+      sel[j, ] <- c(#-- Raw --#
+                    select.perc[j, ] * 100, stop.perc[j] * 100,
+                    #-- Summarized --#
+                    sum(select.perc[j, 1:ndose]) * 100, #Over
+                    stop.perc[j] * 100, #Correct
+                    0) #Under
+      ######## Patient allocation ########
+      alo[j, ] <- c(#-- Raw --#
+                    nptsdose.perc[j, ] * 100, npts[j],
+                    #-- Summarized --#
+                    sum(nptsdose.perc[j, 1:ndose]) * 100, #Over
+                    0, #Correct
+                    0) #Under
     }
+
+    ######## If lowest dose is MTD ########
     else if (sum(mtd.true[j, ]) == 1 & which(mtd.true[j, ] == 1) == 1){
-      sel[j, ] <- c(select.perc[j, ] * 100, stop.perc[j] * 100,
-                    sum(select.perc[j, 2:ndose]) * 100, select.perc[j, 1] * 100, stop.perc[j] * 100)
-      alo[j, ] <- c(nptsdose.perc[j, ] * 100, npts[j],
-                    sum(nptsdose.perc[j, 2:ndose]) * 100, nptsdose.perc[j, 1] * 100, 0)
+      ######## MTD selection ########
+      sel[j, ] <- c(#-- Raw --#
+                    select.perc[j, ] * 100, stop.perc[j] * 100,
+                    #-- Summarized --#
+                    sum(select.perc[j, 2:ndose]) * 100, # Over
+                    select.perc[j, 1] * 100, # Correct
+                    stop.perc[j] * 100) # Under
+      ######## Patient allocation ########
+      alo[j, ] <- c(#-- Raw --#
+                    nptsdose.perc[j, ] * 100, npts[j],
+                    #-- Summarized --#
+                    sum(nptsdose.perc[j, 2:ndose]) * 100, # Over
+                    nptsdose.perc[j, 1] * 100, # Correct
+                    0) # Under
     }
+
+    ######## If highest dose is MTD ########
     else if (sum(mtd.true[j, ]) == 1 & which(mtd.true[j, ] == 1) == ndose){
-      sel[j, ] <- c(select.perc[j, ] * 100, stop.perc[j] * 100,
-                    0, select.perc[j, ndose] * 100, (sum(select.perc[j, 1:(ndose-1)]) + stop.perc[j]) * 100)
-      alo[j, ] <- c(nptsdose.perc[j, ] * 100, npts[j],
-                    0, nptsdose.perc[j, ndose] * 100, sum(nptsdose.perc[j, 1:(ndose-1)]) * 100)
+      ######## MTD selection ########
+      sel[j, ] <- c(#-- Raw --#
+                    select.perc[j, ] * 100, stop.perc[j] * 100,
+                    #-- Summarized --#
+                    0, #Over
+                    select.perc[j, ndose] * 100, #Correct
+                    (sum(select.perc[j, 1:(ndose-1)]) + stop.perc[j]) * 100) #Under
+      ######## Patient allocation ########
+      alo[j, ] <- c(#-- Raw --#
+                    nptsdose.perc[j, ] * 100, npts[j],
+                    #-- Summarized --#
+                    0, #Over
+                    nptsdose.perc[j, ndose] * 100, #Correct
+                    sum(nptsdose.perc[j, 1:(ndose-1)]) * 100) #Under
     }
+
+    ######## If middle dose is MTD ########
     else if (sum(mtd.true[j, ]) == 1 & which(mtd.true[j, ] == 1) > 1 & which(mtd.true[j, ] == 1) < ndose){
       b <- max(which(mtd.true[j, ] == 1))
-      sel[j, ] <- c(select.perc[j, ] * 100, stop.perc[j] * 100,
-                    sum(select.perc[j, (b+1):ndose]) * 100,
-                    select.perc[j, b] * 100,
-                    (sum(select.perc[j, 1:(b-1)]) + stop.perc[j]) * 100)
-      alo[j, ] <- c(nptsdose.perc[j, ] * 100, npts[j],
-                    sum(nptsdose.perc[j, (b+1):ndose]) * 100,
-                    nptsdose.perc[j, b] * 100,
-                    sum(nptsdose.perc[j, 1:(b-1)]) * 100)
-    }
-    else if (sum(mtd.true[j, ]) > 1 & min(which(mtd.true[j, ] == 1)) == 1){
-      b <- max(which(mtd.true[j, ] == 1))
-      sel[j, ] <- c(select.perc[j, ] * 100, stop.perc[j] * 100,
-                    sum(select.perc[j, (b+1):ndose]) * 100,
-                    sum(select.perc[j, 1:b]) * 100,
-                    stop.perc[mtd.true[j, ]] * 100)
-      alo[j, ] <- c(nptsdose.perc[j, ] * 100, npts[j],
-                    sum(nptsdose.perc[j, (b+1):ndose]) * 100,
-                    sum(nptsdose.perc[j, 1:b]) * 100,
-                    0)
-    }
-    else if (sum(mtd.true[j, ]) > 1 & max(which(mtd.true[j, ] == 1)) == ndose){
-      a <- min(which(mtd.true[j, ] == 1))
-      sel[j, ] <- c(select.perc[j, ] * 100, stop.perc[j] * 100,
-                    0,
-                    sum(select.perc[j, a:ndose]) * 100,
-                    (sum(select.perc[j, 1:(a-1)]) + stop.perc[j]) * 100)
-      alo[j, ] <- c(nptsdose.perc[j, ] * 100, npts[j],
-                    0,
-                    sum(nptsdose.perc[j, a:ndose]) * 100,
-                    sum(nptsdose.perc[j, 1:(a-1)]) * 100)
-    }
-    else{
-      a <- min(which(mtd.true[j, ] == 1))
-      b <- max(which(mtd.true[j, ] == 1))
-      sel[j, ] <- c(select.perc[j, ] * 100, stop.perc[j] * 100,
-                    sum(select.perc[j, (b+1):ndose]) * 100,
-                    sum(select.perc[j, a:b]) * 100,
-                    (sum(select.perc[j, 1:(a-1)]) + stop.perc[j]) * 100)
-      alo[j, ] <- c(nptsdose.perc[j, ] * 100, npts[j],
-                    sum(nptsdose.perc[j, (b+1):ndose]) * 100,
-                    nptsdose.perc[j, a:b] * 100,
-                    sum(nptsdose.perc[j, 1:(a-1)]) * 100)
+      ######## MTD selection ########
+      sel[j, ] <- c(#-- Raw --#
+                    select.perc[j, ] * 100, stop.perc[j] * 100,
+                    #-- Summarized --#
+                    sum(select.perc[j, (b+1):ndose]) * 100, #Over
+                    select.perc[j, b] * 100, #Correct
+                    (sum(select.perc[j, 1:(b-1)]) + stop.perc[j]) * 100) #Under
+      ######## Patient allocation ########
+      alo[j, ] <- c(#-- Raw --#
+                    nptsdose.perc[j, ] * 100, npts[j],
+                    #-- Summarized --#
+                    sum(nptsdose.perc[j, (b+1):ndose]) * 100, #Over
+                    nptsdose.perc[j, b] * 100, #Correct
+                    sum(nptsdose.perc[j, 1:(b-1)]) * 100) #Under
     }
   }
 
@@ -152,12 +162,12 @@ summarize.metric <- function(select.perc,
 
     alo$scenario <- 1:nscene
     colnames(alo) <- c(paste0("Dose.",1:ndose),
-                       "Total.patients", "Overdose.Perc", "Correctdose.Perc", "Underdose.Perc",
+                       "Total.participants", "Overdose.Perc", "Correctdose.Perc", "Underdose.Perc",
                        "Scenario")
 
     alo <- alo[,c("Scenario",
                   paste0("Dose.",1:ndose),
-                  "Total.patients", "Overdose.Perc", "Correctdose.Perc", "Underdose.Perc")]
+                  "Total.participants", "Overdose.Perc", "Correctdose.Perc", "Underdose.Perc")]
 
     out = list(sel = sel,
                alo = alo

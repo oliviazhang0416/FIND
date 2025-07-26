@@ -1,18 +1,18 @@
 #'
 #' Dosing decision for the BOIN design
 #'
-#' Generate dosing decisions (E, S, D or DU) of the BOIN design for user-specified number of patients.
+#' Generate dosing decisions (E, S, D or DU) of the BOIN design for user-specified number of participants.
 #'
-#' @usage get.decision.b(pT,
-#'                       EI,
-#'                       npatients)
+#' @usage get.decision.boin(pT,
+#'                          EI,
+#'                          npts)
 #'
 #' @param pT a numeric value that specifies the target DLT rate (\eqn{p_T}).
 #' @param EI a vector that specifies the equivalence interval (EI).
-#' @param npatients the number of patients within which dosing decisions are generated.
+#' @param npts the number of participants within which dosing decisions are generated.
 #'
 #' @details Denote the current dose \eqn{d}. Let \eqn{n_d} and \eqn{y_d} represent the
-#'           number of patients treated at dose \eqn{d} and the number of patients
+#'           number of participants treated at dose \eqn{d} and the number of participants
 #'           experienced DLT, respectively. Let \eqn{p_d} be the toxicity probability at
 #'           dose \eqn{d}. Also, denote \eqn{\frac{y_d}{n_d}} the observed toxicity rate
 #'           at the current dose.
@@ -32,23 +32,23 @@
 #'
 #' (1) a dataframe containing the decisions (E, S, D or DU) for each combination of y and n (\code{$tab}),
 #'
-#' (2) a list (\code{$setup}) containing user input parameters, such as target, EI, npatients, etc.
+#' (2) a list (\code{$setup}) containing user input parameters, such as target, EI, npts, etc.
 #'
 #' @references Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical Trials, \emph{Journal of the Royal Statistical Society: Series C}, 64, 507-523.
 #'
 #' @examples
 #'
-#' get.decision.b(pT = 0.25,
-#'                EI = c(0.15,0.35),
-#'                npatients = 12)
+#' get.decision.boin(pT = 0.25,
+#'                   EI = c(0.15,0.35),
+#'                   npts = 12)
 #' @export
 
-get.decision.b <- function(pT = NULL,
-                           EI = NULL,
-                           npatients = 12){
+get.decision.boin <- function(pT = NULL,
+                              EI = NULL,
+                              npts = 12){
   #Check inputs
-  if (npatients < 3){
-    stop("Warnings: the number of patients should be greater or equal to 3.")
+  if (npts < 3){
+    stop("Warnings: the number of participants should be greater or equal to 3.")
   }
   if (!is.null(pT)){
     if (pT < 0.05) {
@@ -72,11 +72,11 @@ get.decision.b <- function(pT = NULL,
   lambda2 = log((1 - pT)/(1 - EI[2]))/log(EI[2] * (1 - pT)/(pT * (1 - EI[2])))
 
   #Enumerate all possible y given n
-  tab <- data.frame("n" = rep(3:npatients, times = 4:(npatients+1)),
+  tab <- data.frame("n" = rep(3:npts, times = 4:(npts+1)),
                     "y" = NA,
                     "Decision" = NA)
 
-  for (n in 3:npatients){
+  for (n in 3:npts){
     store <- c()
 
     for (y in 0:n){
@@ -109,22 +109,10 @@ get.decision.b <- function(pT = NULL,
 
   ################# User's setup #################
   setup <- list(method = "BOIN",
-                npatients = npatients,
-                pT = ifelse(!is.null(pT),
-                            pT,
-                            NA),
-                EI = c(ifelse(!is.null(EI[1]),
-                              EI[1],
-                              NA),
-                       ifelse(!is.null(EI[2]),
-                              EI[2],
-                              NA)),
-                boundary = c(ifelse(!is.null(EI[1]),
-                                    round(lambda1,3),
-                                    NA),
-                             ifelse(!is.null(EI[2]),
-                                    round(lambda2,3),
-                                    NA)))
+                npts = npts,
+                pT = pT,
+                EI = paste0("[", EI[1], ", ", EI[2],")"),
+                boundary = paste0(round(lambda1,3), ", ", round(lambda2,3)))
 
   return(list("tab" = tab,
               "setup" = setup))

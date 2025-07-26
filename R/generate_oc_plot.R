@@ -5,11 +5,15 @@
 #'
 #' @usage generate_oc_plot(`3+3` = NULL,
 #'                         `BOIN` = NULL,
-#'                         `i3+3` = NULL)
+#'                         `mTPI2` = NULL,
+#'                         `i3+3` = NULL,
+#'                         `G3` = NULL)
 #'
 #' @param 3+3 the object returned by run.sim.3()
-#' @param BOIN the object returned by run.sim.b()
+#' @param BOIN the object returned by run.sim.boin()
+#' @param mTPI2 the object returned by run.sim.mtpi2()
 #' @param i3+3 the object returned by run.sim.i3()
+#' @param G3 the object returned by run.sim.g3()
 #'
 #' @return \code{generate_oc_plot()} returns figures displaying the operating characteristics for the user-specified design(s).
 #'
@@ -26,12 +30,18 @@
 
 generate_oc_plot <- function(`3+3` = NULL,
                              `BOIN` = NULL,
-                             `i3+3` = NULL){
+                             `mTPI2` = NULL,
+                             `i3+3` = NULL,
+                             `G3` = NULL){
 
-  method <- c("3+3","BOIN","i3+3")[c(!is.null(`3+3`), !is.null(`BOIN`), !is.null(`i3+3`))]
+  method <- c("3+3","BOIN","mTPI2","i3+3","G3")[c(!is.null(`3+3`),
+                                          !is.null(`BOIN`),
+                                          !is.null(`mTPI2`),
+                                          !is.null(`i3+3`),
+                                          !is.null(`G3`))]
 
   # Check
-  if(length(method) != sum(!is.null(`3+3`),!is.null(`BOIN`), !is.null(`i3+3`))){
+  if(length(method) != sum(!is.null(`3+3`),!is.null(`BOIN`),!is.null(`mTPI2`),!is.null(`i3+3`), !is.null(`G3`))){
     stop("Warnings: Please double check the input(s)!")
   }
   if("3+3" %in% method & (is.null(`3+3`))){
@@ -40,23 +50,36 @@ generate_oc_plot <- function(`3+3` = NULL,
   if("BOIN" %in% method & (is.null(`BOIN`))){
     stop("Warnings: Please double check the input(s)!")
   }
+  if("mTPI2" %in% method & (is.null(`mTPI2`))){
+    stop("Warnings: Please double check the input(s)!")
+  }
   if("i3+3" %in% method & (is.null(`i3+3`))){
     stop("Warnings: Please double check the input(s)!")
   }
+  if("G3" %in% method & (is.null(`G3`))){
+    stop("Warnings: Please double check the input(s)!")
+  }
+
 
   result.store <- list("selection" = rbind(`3+3`$selection,
                                            `BOIN`$selection,
-                                           `i3+3`$selection),
+                                           `mTPI2`$selection,
+                                           `i3+3`$selection,
+                                           `G3`$selection),
                        "allocation" = rbind(`3+3`$allocation,
                                          `BOIN`$allocation,
-                                         `i3+3`$allocation))
+                                         `mTPI2`$allocation,
+                                         `i3+3`$allocation,
+                                         `G3`$allocation))
 
   result.store[[1]]$Method <- rep(method, each = nrow(result.store[[1]])/length(method))
   result.store[[2]]$Method <- rep(method, each = nrow(result.store[[2]])/length(method))
 
   setup.store <- list(`3+3` = `3+3`$setup,
-                       `BOIN` = `BOIN`$setup,
-                       `i3+3` = `i3+3`$setup)
+                      `BOIN` = `BOIN`$setup,
+                      `mTPI2` = `mTPI2`$setup,
+                      `i3+3` = `i3+3`$setup,
+                      `G3` = `G3`$setup)
 
   plot.store <- list("selection" = NULL,
                      "allocation" = NULL)
@@ -70,7 +93,7 @@ generate_oc_plot <- function(`3+3` = NULL,
     ################# Add title #################
     purals <- ifelse(length(method) == 1, " design", " designs")
     titleName <- c("Operating characteristics (dose selection)",
-                   "Operating characteristics (patient allocation)")
+                   "Operating characteristics (participant allocation)")
 
     ################# Reformat data #################
     #Melt data
@@ -94,12 +117,12 @@ generate_oc_plot <- function(`3+3` = NULL,
                                                                   "Percentage of underdosing selection (PUS)"))
     }
     else if (j == 2){
-      result_$MetricLabel <- ifelse(result_$Metric == "Overdose.Perc", "Percentage of overdosing assignment (POA)",
-                                   ifelse(result_$Metric == "Correctdose.Perc", "Percentage of correct assignment (PCA)",
-                                          ifelse(result_$Metric == "Underdose.Perc", "Percentage of underdosing assignment (PUA)", NA)))
-      result_$MetricLabel <- factor(result_$MetricLabel, levels = c("Percentage of overdosing assignment (POA)",
-                                                                  "Percentage of correct assignment (PCA)",
-                                                                  "Percentage of underdosing assignment (PUA)"))
+      result_$MetricLabel <- ifelse(result_$Metric == "Overdose.Perc", "Percentage of overdosing allocation (POA)",
+                                   ifelse(result_$Metric == "Correctdose.Perc", "Percentage of correct allocation (PCA)",
+                                          ifelse(result_$Metric == "Underdose.Perc", "Percentage of underdosing allocation (PUA)", NA)))
+      result_$MetricLabel <- factor(result_$MetricLabel, levels = c("Percentage of overdosing allocation (POA)",
+                                                                  "Percentage of correct allocation (PCA)",
+                                                                  "Percentage of underdosing allocation (PUA)"))
     }
 
     ################# Add facet labels #################
@@ -112,9 +135,9 @@ generate_oc_plot <- function(`3+3` = NULL,
     result_ <- result_ %>% group_by(.data$Method, .data$Scenario) %>%
       mutate(PercentPos = (100-cumsum(.data$Percent) + 0.5*.data$Percent))
 
-    ################# Order methods: 3+3, i3+3, BOIN #################
+    ################# Order methods: 3+3, i3+3, BOIN, mTPI2, G3 #################
     result_$Method <- factor(result_$Method,
-                             levels = c("3+3","BOIN","i3+3"))
+                             levels = c("3+3","BOIN","mTPI2","i3+3","G3"))
 
     ############################# Main plot #############################
 
@@ -161,3 +184,4 @@ generate_oc_plot <- function(`3+3` = NULL,
 
   return(plot.store)
 }
+

@@ -21,7 +21,8 @@ In this vignette we will demonstrate how to use `FIND` package to generate decis
 Begin by loading the `FIND` library and dependencies:
 
 ```{r}
-library(FIND)
+rm(list=ls(all=TRUE))
+# library(FIND)
 # Dependencies
 library(ggplot2)
 library(dplyr)
@@ -34,8 +35,8 @@ library(gtable)
 # Main directory
 mainDir <- "/Users/oliviazhang/Desktop/"
 
-# library(miceadds)
-# source.all(paste0(mainDir, "/FIND/R"))
+library(miceadds)
+source.all(paste0(mainDir, "/FIND/R"))
 ```
 
 
@@ -46,38 +47,46 @@ First, we call the `get.decision.x` functions, where we can replace `x` with the
 For example:
 
 ```{r}
-decision_i3 <- get.decision.i3(pT = 0.25,
-                               EI = c(0.2,0.3),
-                               npatients = 12)
+decision_g3 <- get.decision.g3(npts = 12)
 
-decision_boin <- get.decision.b(pT = 0.25,
-                                EI = c(0.15,0.35),
-                                npatients = 12)
+# decision_i3 <- get.decision.i3(pT = 0.25,
+#                                EI = c(0.2,0.3),
+#                                npts = 12)
 
-decision_3 <- get.decision.3(npatients = 12)
+# decision_boin <- get.decision.boin(pT = 0.25,
+#                                    EI = c(0.15,0.35),
+#                                    npts = 12)
+
+decision_3 <- get.decision.3(npts = 12)
+
+# decision_mtpi2 <- get.decision.mtpi2(pT = 0.25,
+#                                      EI = c(0.2,0.3),
+#                                      npts = 12)
 ```
 
 Next, we call the `generate_decision_table` function, which will automatically generate the decision table. 
 
 ```{r}
-plot <- generate_decision_table(#`3+3` = decision_3,
-                                `BOIN` = decision_boin)
-                                #`i3+3` = decision_i3)
+plot <- generate_decision_table(#`BOIN` = decision_boin,
+                                `3+3` = decision_3,
+                                # `i3+3` = decision_i3,
+                                `G3` = decision_g3)
+                                #`mTPI2` = decision_mtpi2)
 ```
 
 We can also save the plot the local directory:
 ```{r}
-# #Create a new directory named “Results”
-# new.folder <- "Results"
-# dir.create(file.path(mainDir, new.folder))
-# #Create a new sub-directory named “Decision Tables”
-# new.subfolder <- "Decision Tables"
-# dir.create(file.path(mainDir, new.folder, new.subfolder))
-# 
-# ggsave(paste0(file.path(mainDir, new.folder, new.subfolder),"/decision_table.jpg"),
-#        width = 18,
-#        height = 8,
-#        plot)
+#Create a new directory named “Results”
+new.folder <- "Results"
+dir.create(file.path(mainDir, new.folder))
+#Create a new sub-directory named “Decision Tables”
+new.subfolder <- "Decision Tables"
+dir.create(file.path(mainDir, new.folder, new.subfolder))
+
+ggsave(paste0(file.path(mainDir, new.folder, new.subfolder),"/decision_table.jpg"),
+       width = 24,
+       height = 8,
+       plot)
 ```
  
    

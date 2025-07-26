@@ -1,36 +1,27 @@
 #'
-#' Simulations for the i3+3 design.
+#' Simulations for the G3 design.
 #'
-#' Conduct computer simulations for the i3+3 design.
+#' Conduct computer simulations for the G3 design.
 #'
-#' @usage run.sim.i3(p.true,
+#' @usage run.sim.g3(p.true,
 #'                   mtd.true,
-#'                   pT,
-#'                   EI,
 #'                   ncohort,
 #'                   cohortsize = 3,
 #'                   startdose = 1,
-#'                   DU.pp = 0.95,
 #'                   n.earlystop = 100,
-#'                   extrasafe = FALSE,
 #'                   ntrial = 1000,
 #'                   seed = 6)
 #'
 #' @param p.true a vector or matrix containing the true toxicity probabilities of the investigational dose levels.
 #' @param mtd.true a numeric value or a vector which specifies the true MTD.
-#' @param pT a numeric value; the target DLT rate.
-#' @param EI a vector which specifies the equivalence interval (EI).
 #' @param ncohort a numeric value; the total number of cohorts.
 #' @param cohortsize a numeric value; the cohort size.
 #' @param startdose a numeric value; the starting dose level for the trial.
-#' @param DU.pp a numeric value; the cutoff to remove an overly toxic dose for safety.
-#'              We recommend the default value of (\code{DU.pp=0.95}) for general use.
 #' @param n.earlystop a numeric value; the early stopping parameter. If the number of participants
 #'                    treated at the current dose reaches \code{n.earlystop},
 #'                    stop the trial and select the MTD based on the observed data.
 #'                    The default value \code{n.earlystop=100} essentially turns
 #'                    off this type of early stopping.
-#' @param extrasafe a logical value which specifies whether to implement a more strict safety rule (see more in the Details).
 #' @param ntrial a numeric value; the total number of simulated trials.
 #' @param seed a numeric value; the random seed for simulation.
 #'
@@ -40,33 +31,33 @@
 #'           dose \eqn{d}. Also, denote \eqn{\frac{y_d}{n_d}} the observed toxicity rate
 #'           at the current dose.
 #'
-#'           The i3+3 design uses the following decision rules. If
-#'           \eqn{\frac{y_d}{n_d}} is lower than the escalation boundary (i.e. below
-#'           the EI), the decision is to escalate to the next higher dose; if
-#'           \eqn{\frac{y_d}{n_d}} is between the escalation and de-escalation boundaries
-#'           (i.e. inside the EI), the decision is to stay at the current dose; if
+#'           The G3 design uses the following decision rules. For \eqn{n} is three or six,
+#'           we simply apply the 3+3 rules; otherwise, we use the following decision rules,
+#'           with EI being [0.2, 0.29]. If \eqn{\frac{y_d}{n_d}} is lower than the escalation
+#'           boundary (i.e. below the EI), the decision is to escalate to the next higher dose;
+#'           if \eqn{\frac{y_d}{n_d}} is between the escalation and de-escalation boundaries
+#'           (between the EI), the decision is to stay at the current dose; if
 #'           \eqn{\frac{y_d}{n_d}} is higher than the de-escalation boundary (i.e. above
-#'           the EI), there are two options: option one, if \eqn{\frac{y_d-1}{n_d}} is
-#'           lower than the escalation boundary (i.e., below the EI), the decision is
-#'           to stay at the current dose; option two, else if \eqn{\frac{y_d-1}{n_d}}
-#'           is equal to or higher than the escalation boundary, the decision is to
-#'           de-escalate to the next lower dose.
+#'           the EI), the decision is to de-escalate to the next lower dose.
 #'
-#'           Also, the i3+3 design includes a dose exclusion rule. Let \eqn{p_T} represents
-#'           the target DLT rate. If \eqn{Pr(p_d > p_T | y_d , n_d ) > 0.95}, dose \eqn{d}
-#'           and those higher than \eqn{d} are removed from the trial since they are deemed
-#'           excessively toxic.
+#'           Also, the G3 design includes a dose exclusion rule. If \eqn{Pr(p_d > 0.25 | y_d , n_d ) > 0.95},
+#'           dose \eqn{d} and those higher than \eqn{d} are removed from the trial since
+#'           they are deemed excessively toxic.
 #'
-#'           The i3+3 design has two early stopping rules: (1) stop the trial if the lowest
+#'           Three rules (1)-(3) with which G3 selects the final MTD after the trial is completed.
+#'           (1) After removing doses based on the dose exclusion rule in (b), at the end of the
+#'           trial, G3 selects the highest tested dose for which the decision is to de-escalate.
+#'           (2) If no tested doses have a decision to de-escalate (meaning their decisions are
+#'           either escalate or stay), G3 selects the highest tested dose as the MTD. (3) If the
+#'           lowest dose has a decision to de-escalate, no dose is selected as the MTD.
+#'
+#'           The G3 design has two early stopping rules: (1) stop the trial if the lowest
 #'          dose is eliminated due to toxicity, and no dose should be selected as the MTD; and
 #'          (2) stop the trial and select the MTD if the number of participants treated at the current
 #'          dose reaches \code{n.earlystop}.
 #'
-#'          For some applications, investigators may prefer a more strict safety rule for MTD selection
-#'          (This can be achieved by setting \code{extrasafe} == T). If the isotonically-transformed
-#'          posterior mean of the selected MTD is above the EI, select the next lower dose as the final MTD.
 #'
-#' @return \code{run.sim.i3()} returns:
+#' @return \code{run.sim.g3()} returns:
 #'
 #' (1) a dataframe (\code{$selection}) with each column showing:
 #'        the numbered index for each scenarios specified,
@@ -90,35 +81,26 @@
 #'
 #' (3) a list (\code{$setup}) containing user input parameters.
 #'
-#' @references Liu M., Wang, SJ. and Ji, Y. (2020). The i3+3 Design for Phase I Clinical Trials, \emph{Journal of
-#' biopharmaceutical statistics}, 30(2):294–304.
+#' @references To be added
 #'
 #' @examples
-#' run.sim.i3(p.true = c(0.25, 0.41, 0.45, 0.49, 0.53),
+#' run.sim.g3(p.true = c(0.25, 0.41, 0.45, 0.49, 0.53),
 #'            mtd.true = c(1,0,0,0,0),
-#'            pT = 0.25,
-#'            EI = c(0.2,0.3),
 #'            ncohort = 9,
 #'            cohortsize = 3,
 #'            startdose = 1,
-#'            DU.pp = 0.95,
 #'            n.earlystop = 100,
-#'            extrasafe = FALSE,
 #'            ntrial = 1000,
 #'            seed = 6)
 #'
 #' @export
 #'
-run.sim.i3 = function (p.true,
+run.sim.g3 = function (p.true,
                        mtd.true,
-                       pT,
-                       EI,
                        ncohort,
                        cohortsize = 3,
                        startdose = 1,
-                       DU.pp = 0.95,
                        n.earlystop = 100,
-                       extrasafe = FALSE,
                        ntrial = 1000,
                        seed = 6)
 {
@@ -147,29 +129,15 @@ run.sim.i3 = function (p.true,
   else{
     stop("Warnings: please make sure the p.true and mtd.true have the same dimension!")
   }
-
-  if (!is.null(pT)){
-    if (pT < 0.05) {
-      stop("Warnings: the pT is too low!")
-    }
-    if (pT > 0.6) {
-      stop("Warnings: the pT is too high!")
-    }
-  }
-  if (!is.null(EI)) {
-    if ((pT - EI[1]) < (0.1 * pT)) {
-      stop("Warnings: the upper bound for EI cannot be higher than or too close to the pT!")
-    }
-    if ((EI[2] - pT) < (0.1 * pT)) {
-      stop("Warnings: the lower bound for EI cannot be lower than or too close to the pT!")
-    }
-  }
   if (n.earlystop <= 6) {
     warning("Warnings: the value of n.earlystop is too low to ensure good operating characteristics. Recommend n.earlystop = 9 to 18.")
   }
 
   ################################# Step 1 #################################
   ###################### Safety rule (dose exclusion) ######################
+  pT = 0.25
+  DU.pp = 0.95
+
   b.DU = c()
   for (n in 1:(ncohort * cohortsize)) {
     if (n < 3) {
@@ -201,7 +169,7 @@ run.sim.i3 = function (p.true,
 
     set.seed(seed)
 
-    p <- p.true[j,]
+    p = p.true[j,]
 
     # store Y and N
     Y = matrix(rep(0, ndose * ntrial), ncol = ndose)
@@ -215,6 +183,7 @@ run.sim.i3 = function (p.true,
 
       y = rep(0, ndose)
       n = rep(0, ndose)
+      decision = rep(" ", ndose)
 
       d = startdose
       earlystop = 0
@@ -222,86 +191,98 @@ run.sim.i3 = function (p.true,
 
       for (c in 1:ncohort) {
 
-          ### Generate random toxicity response ######
-          DLT = runif(cohortsize) < p[d];
-          y[d] = y[d] + sum(DLT);
-          n[d] = n[d] + cohortsize
+        ### Generate random toxicity response ###
+        DLT = runif(cohortsize) < p[d];
+        y[d] = y[d] + sum(DLT);
+        n[d] = n[d] + cohortsize
 
-          ###### DU current and higher doses ######
-          if (!is.na(b.DU[n[d]])) {
-            if (y[d] >= b.DU[n[d]]) {
+        ### Set default EIs ###
+        if (n[d] == 3){
+          a <- 0.2
+          b <- 1/3
+        }
+        else{
+          a <- 0.2
+          b <- 0.29
+        }
 
-              elimi[d:ndose] = 1
+        ###### DU current and higher doses ######
+        if (!is.na(b.DU[n[d]])) {
+          if (y[d] >= b.DU[n[d]]) {
 
-              if (d == 1) {
-                earlystop = 1
-                break;
-              }
-            }}
+            elimi[d:ndose] = 1
+
+            if (d == 1) {
+              earlystop = 1
+              break;
+            }
+          }}
 
           ###### Early stop rule if n reaches xx ######
           if(n[d]>=n.earlystop &&
              (
-               (y[d]/n[d] >= EI[1] && y[d]/n[d] <= EI[2]) ||
-               (y[d]/n[d] > EI[2] && (y[d]-1)/n[d] < EI[1]) ||
-               (d==1 && y[d]/n[d] > EI[2] && (y[d]-1)/n[d] >= EI[1]) ||
-               ((d==ndose || elimi[d+1]==1) && y[d]/n[d] < EI[1])
+               (y[d]/n[d] >= a && y[d]/n[d] <= b) ||
+               (d==1 && y[d]/n[d] > b)||
+               ((d==ndose || elimi[d+1]==1) && y[d]/n[d] < a)
              )  ) break;
 
           ########## if lowest dose ##########
           if (d == 1){
-              if(y[d]/n[d] < EI[1]){
-                if (elimi[d + 1] == 0){
-                  d = d+1
+            if(y[d]/n[d] < a){
+              if (elimi[d + 1] == 0){
+                decision[d] = "E"
+                d = d+1
+                }
+              else{
+                decision[d] = "S"
+                d = d
                 }
               }
-              else if( y[d]/n[d] >= EI[1] & y[d]/n[d] <= EI[2]){
-                d = d
+            else if( y[d]/n[d] >= a & y[d]/n[d] <= b){
+              decision[d] = "S"
+              d = d
               }
-
-              else if((y[d]-1)/n[d]< EI[1]){
-                d = d
-              }
-              else if(y[d]/n[d]> EI[2]){
-                d = d
+            else if (y[d]/n[d] > b){
+              decision[d] = "S"
+              d = d
               }
           }
           ########## if highest dose ##########
           else if (d == ndose) {
-
-            if(y[d]/n[d] < EI[1]){
+            if(y[d]/n[d] < a){
+              decision[d] = "S"
               d = d
             }
-            else if( y[d]/n[d] >= EI[1] & y[d]/n[d] <= EI[2]){
-                d = d
+            else if( y[d]/n[d] >= a & y[d]/n[d] <= b){
+              decision[d] = "S"
+              d = d
             }
-            else if( (y[d]-1)/n[d] < EI[1]){
-                d = d
-              }
-            else if( y[d]/n[d] > EI[2]){
+            else if ( y[d]/n[d] > b){
+              decision[d] = "D"
               d = d-1
             }
           }
           ########## if in middle dose ##########
           else if((d > 1) && (d < ndose)){
-              if( y[d]/n[d] < EI[1]){
-                if (elimi[d + 1] == 0){
-                  d = d+1
+            if( y[d]/n[d] < a){
+              if (elimi[d + 1] == 0){
+                decision[d] = "E"
+                d = d+1
                 }
-                else{
-                  d = d
+              else{
+                d = d
+                decision[d] = "S"
                 }
               }
-              else if(y[d]/n[d] >= EI[1] & y[d]/n[d] <= EI[2]){
-                  d = d
+            else if(y[d]/n[d] >= a & y[d]/n[d] <= b){
+              decision[d] = "S"
+              d = d
               }
-              else if( (y[d]-1)/n[d] < EI[1]){
-                  d = d
-              }
-              else if( y[d]/n[d] > EI[2]){
-                d = d-1
-              }
-          }
+            else if( y[d]/n[d] > b){
+              decision[d] = "D"
+              d = d-1
+            }
+            }
         }
 
       ################################# Step 3 #################################
@@ -310,56 +291,69 @@ run.sim.i3 = function (p.true,
         MTD[trial] = 99
       }
       else {
-        MTD[trial] = select.mtd(method = "i3+3",
-                                pT = pT,
-                                EI = EI,
-                                n_obs = n,
-                                y_obs = y,
-                                DU.pp = DU.pp,
-                                extrasafe = extrasafe)$d_selected
+        DU_index <- ifelse(length(which(elimi == 1)) == 0,
+                           99,
+                           which(elimi == 1)[1])
+
+        # If there is D among the tested doses
+        if (length(which(decision=="D")) > 0){
+          if (min(which(decision=="D")) == 1){
+            MTD[trial] <- 99
+          }
+          else {
+            MTD[trial] <- min(which(decision=="D"), DU_index)-1
+          }
+        }
+        # If all doses are tested and no D
+        else if ((length(which(decision=="D")) == 0) & (length(which(decision==" ")) == 0)){
+          # Select the highest tested dose
+          MTD[trial] <- min(ndose, DU_index-1)
+        }
+        # If not all are tested and no D
+        else if ((length(which(decision=="D")) == 0) & (length(which(decision==" ")) > 0)){
+          # Select the highest tested dose
+          MTD[trial] <- min(which(decision==" ")-1, DU_index-1)
+        }
       }
 
       Y[trial, ] = y
       N[trial, ] = n
     }
 
-  ################################# Step 4 #################################
-  ########################### Summarize metrics ############################
+    ################################# Step 4 #################################
+    ########################### Summarize metrics ############################
+    nptsdose[j, ] = colMeans(N) #average number of participants
+    #nptsdose.perc = colMeans(N)/sum(colMeans(N))
+    npts[j] = mean(rowSums(N)) #average total number of participants
 
-  nptsdose[j, ] = colMeans(N) #average number of participants
-  #nptsdose.perc = colMeans(N)/sum(colMeans(N))
-  npts[j] = mean(rowSums(N)) #average total number of participants
+    for (i in 1:ndose) {
+      select.perc[j, i] = sum(MTD == i)/ntrial
+    }
+    stop.perc[j] = sum(MTD == 99)/ntrial
+    }
 
-  for (i in 1:ndose) {
-    select.perc[j, i] = sum(MTD == i)/ntrial
-  }
-  stop.perc[j] = sum(MTD == 99)/ntrial
+    setup = list(method = "G3",
+                  startdose = startdose,
+                  cohortsize =  cohortsize,
+                  ncohort =  ncohort,
+                  pT = "0.25",
+                  EI = c("[0.2, 1/3]\n[0.2, 0.29]"),
+                  boundary = c("0.2, 1/3\n0.2, 0.29"),
+                  DU.pp =  "0.95",
+                  n.earlystop =  n.earlystop)
 
-  }
-
-  setup = list(method = "i3+3",
-               startdose = startdose,
-               cohortsize =  cohortsize,
-               ncohort =  ncohort,
-               pT = pT,
-               EI = EI,
-               boundary = EI,
-               DU.pp =  DU.pp,
-               extrasafe =  extrasafe,
-               n.earlystop =  n.earlystop)
-
-  out = list(selection = summarize.metric(select.perc = select.perc,
-                                       stop.perc = stop.perc,
-                                       nptsdose = nptsdose,
-                                       npts = npts,
-                                       mtd.true = mtd.true)$sel,
-             allocation = summarize.metric(select.perc = select.perc,
-                                     stop.perc = stop.perc,
-                                     nptsdose = nptsdose,
-                                     npts = npts,
-                                     mtd.true = mtd.true)$alo,
-             setup = setup
-  )
+    out = list(selection = summarize.metric(select.perc = select.perc,
+                                            stop.perc = stop.perc,
+                                            nptsdose = nptsdose,
+                                            npts = npts,
+                                            mtd.true = mtd.true)$sel,
+               allocation = summarize.metric(select.perc = select.perc,
+                                             stop.perc = stop.perc,
+                                             nptsdose = nptsdose,
+                                             npts = npts,
+                                             mtd.true = mtd.true)$alo,
+               setup = setup
+    )
 
   return(out)
 }

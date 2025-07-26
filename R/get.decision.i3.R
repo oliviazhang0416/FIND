@@ -1,18 +1,18 @@
 #'
 #' Dosing decision for the i3+3 design
 #'
-#' Generate dosing decisions (E, S, D or DU) of the i3+3 design for user-specified number of patients.
+#' Generate dosing decisions (E, S, D or DU) of the i3+3 design for user-specified number of participants.
 #'
 #' @usage get.decision.i3(pT = NULL,
 #'                        EI = NULL,
-#'                        npatients = 12)
+#'                        npts = 12)
 #'
 #' @param pT a numeric value that specifies the target DLT rate (\eqn{p_T}).
 #' @param EI a vector that specifies the equivalence interval (EI).
-#' @param npatients the number of patients within which dosing decisions are generated.
+#' @param npts the number of participants within which dosing decisions are generated.
 #'
 #' @details  Denote the current dose \eqn{d}. Let \eqn{n_d} and \eqn{y_d} represent the
-#'           number of patients treated at dose \eqn{d} and the number of patients
+#'           number of participants treated at dose \eqn{d} and the number of participants
 #'           experienced DLT, respectively. Let \eqn{p_d} be the toxicity probability at
 #'           dose \eqn{d}. Also, denote \eqn{\frac{y_d}{n_d}} the observed toxicity rate
 #'           at the current dose.
@@ -39,7 +39,7 @@
 #'
 #' (1) a dataframe containing the decisions (E, S, D or DU) for each combination of y and n (\code{$tab}),
 #'
-#' (2) a list (\code{$setup}) containing user input parameters, such as target, EI, npatients, etc.
+#' (2) a list (\code{$setup}) containing user input parameters, such as target, EI, npts, etc.
 #'
 #' @references Liu M., Wang, SJ. and Ji, Y. (2020). The i3+3 Design for Phase I Clinical Trials, \emph{Journal of
 #' biopharmaceutical statistics}, 30(2):294–304.
@@ -48,16 +48,16 @@
 #'
 #' get.decision.i3(pT = 0.25,
 #'                 EI = c(0.2,0.3),
-#'                 npatients = 12)
+#'                 npts = 12)
 #' @export
 #'
 get.decision.i3 <- function(pT = NULL,
                             EI = NULL,
-                            npatients = 12){
+                            npts = 12){
 
   #Check inputs
-  if (npatients < 3){
-    stop("Warnings: the number of patients should be greater or equal to 3.")
+  if (npts < 3){
+    stop("Warnings: the number of participants should be greater or equal to 3.")
   }
   if (!is.null(pT)){
     if (pT < 0.05) {
@@ -78,12 +78,12 @@ get.decision.i3 <- function(pT = NULL,
   }
 
   #Enumerate all possible y given n
-  tab <- data.frame("n" = rep(3:npatients,
-                              times = 4:(npatients+1)),
+  tab <- data.frame("n" = rep(3:npts,
+                              times = 4:(npts+1)),
                     "y" = NA,
                     "Decision" = NA)
 
-  for (n in 3:npatients){
+  for (n in 3:npts){
     store <- c()
 
     for (y in 0:n){
@@ -127,23 +127,28 @@ get.decision.i3 <- function(pT = NULL,
   tab$method <- "i3+3"
 
   ################# User's setup #################
+  # setup <- list(method = "i3+3",
+  #               npts = npts,
+  #               pT = ifelse(!is.null(pT),
+  #                           pT,
+  #                           NA),
+  #               EI = c(ifelse(!is.null(EI[1]),
+  #                             EI[1],
+  #                             NA),
+  #                      ifelse(!is.null(EI[2]),
+  #                             EI[2],
+  #                             NA)),
+  #               boundary = c(ifelse(!is.null(EI[1]),
+  #                                   EI[1],
+  #                                   NA),
+  #                            ifelse(!is.null(EI[2]),
+  #                                   EI[2],
+  #                                   NA)))
   setup <- list(method = "i3+3",
-                npatients = npatients,
-                pT = ifelse(!is.null(pT),
-                            pT,
-                            NA),
-                EI = c(ifelse(!is.null(EI[1]),
-                              EI[1],
-                              NA),
-                       ifelse(!is.null(EI[2]),
-                              EI[2],
-                              NA)),
-                boundary = c(ifelse(!is.null(EI[1]),
-                                    EI[1],
-                                    NA),
-                             ifelse(!is.null(EI[2]),
-                                    EI[2],
-                                    NA)))
+                npts = npts,
+                pT = pT,
+                EI = paste0("[",EI[1],", ",EI[2], "]"),
+                boundary = paste0(EI[1],", ",EI[2]))
 
   return(list("tab" = tab,
               "setup" = setup))

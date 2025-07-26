@@ -2,7 +2,7 @@
 % Please edit documentation in R/select.mtd.R
 \name{select.mtd}
 \alias{select.mtd}
-\title{Select the maximum tolerated dose (MTD)}
+\title{Select the maximum tolerated dose (MTD) using isotonic regression}
 \usage{
 select.mtd(method,
                   pT,
@@ -13,15 +13,15 @@ select.mtd(method,
                   extrasafe = F)
 }
 \arguments{
-\item{method}{the design name.}
+\item{method}{the design name; only i3+3 and BOIN are accepted.}
 
 \item{pT}{a numeric value; the target DLT rate.}
 
 \item{EI}{a vector which specifies the equivalence interval (EI).}
 
-\item{n_obs}{a vector containing the number of patients treated at each dose level.}
+\item{n_obs}{a vector containing the number of participants treated at each dose level.}
 
-\item{y_obs}{a vector containing the number of patients who experienced dose-limiting toxicity at each dose level.}
+\item{y_obs}{a vector containing the number of participants who experienced dose-limiting toxicity at each dose level.}
 
 \item{DU.pp}{a numeric value; the cutoff to remove an overly toxic dose for safety.
 We recommend the default value of (\code{DU.pp=0.95}) for general use.}
@@ -32,7 +32,7 @@ We recommend the default value of (\code{DU.pp=0.95}) for general use.}
 \code{select.mtd()} returns the selected MTD dose (\code{$d_selected})
 }
 \description{
-Select the maximum tolerated dose (MTD) when the trial is completed
+Select the maximum tolerated dose (MTD) when the trial is completed using isotonic regression
 }
 \details{
 \code{select.mtd()} selects the MTD based on isotonic estimates of toxicity

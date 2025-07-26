@@ -15,9 +15,9 @@ summarize.metric(select.perc,
 
 \item{stop.perc}{the percentage of early stopping without selecting the MTD.}
 
-\item{nptsdose}{the number of patients treated for each dose.}
+\item{nptsdose}{the number of participants treated for each dose.}
 
-\item{npts}{the average number of patients treated.}
+\item{npts}{the average number of participants treated.}
 
 \item{mtd.true}{a vector (or a matrix) with the same dimension as
 the vector (or matrix) containing the true toxicity probabilities (\code{$p.true}).
@@ -36,11 +36,11 @@ It should takes value of 0 or 1, and 1 specifies the true MTD.}
 
 (2) a dataframe (\code{$allocation}) with each column showing:
        the numbered index for each scenarios specified,
-       the number of patients treated at each dose level,
-       the average number of patients treated,
-       the percentage of overdosing assignment (POA),
-       the percentage of correct assignment (PCA),
-       the percentage of underdosing assignment (PUA), respectively.
+       the number of participants treated at each dose level,
+       the average number of participants treated,
+       the percentage of overdosing allocation (POA),
+       the percentage of correct allocation (PCA),
+       the percentage of underdosing allocation (PUA), respectively.
 }
 \description{
 Summarize after conducting simulations

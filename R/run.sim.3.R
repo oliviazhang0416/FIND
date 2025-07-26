@@ -17,18 +17,18 @@
 #'
 #' @details The 3+3 design uses the following decision rules.
 #'
-#' (1). Start trial by treating three patients at the initial dose.
+#' (1). Start trial by treating three participants at the initial dose.
 #'
-#' (2). Denote the dose level being used to treat patients as the current dose level.
-#'      Treat three patients at the current dose level.
+#' (2). Denote the dose level being used to treat participants as the current dose level.
+#'      Treat three participants at the current dose level.
 #'
-#' (3). Check the number of patients at the current dose level.
+#' (3). Check the number of participants at the current dose level.
 #'
-#' 3a. If there are three patients, go to (4).
+#' 3a. If there are three participants, go to (4).
 #'
-#' 3b. If there are six patients, go to (5).
+#' 3b. If there are six participants, go to (5).
 #'
-#' (4). Check the number of toxicities (among three patients) at the current dose level.
+#' (4). Check the number of toxicities (among three participants) at the current dose level.
 #'
 #' 4a. If there are zero toxicities, escalate and go to (7).
 #'
@@ -36,7 +36,7 @@
 #'
 #' 4c. If there are two or three toxicities, declare that the MTD has been exceeded and go to (6).
 #'
-#' (5). Check the number of toxicities (among six patients) at the current dose level.
+#' (5). Check the number of toxicities (among six participants) at the current dose level.
 #'
 #' 5a. If there are zero toxicities, stop the trial and declare that the MTD is the current dose.
 #'
@@ -50,8 +50,8 @@
 #' 6a. If the current dose is the lowest dose, stop the trial and declare that the MTD is lower than
 #' the lowest dose level.
 #'
-#' 6b. If then next-lower dose level has six patients, stop the trial and declare that the MTD is the
-#' next lower dose level; otherwise, the next lower dose level has three patients; set the current dose
+#' 6b. If then next-lower dose level has six participants, stop the trial and declare that the MTD is the
+#' next lower dose level; otherwise, the next lower dose level has three participants; set the current dose
 #' level to be the next-lower dose level and go to (2).
 #'
 #' (7). Escalate if possible.
@@ -76,17 +76,18 @@
 #' (2) a dataframe (\code{$allocation}) with each column showing:
 #'        the numbered index for each scenarios specified,
 #'        the name of the design,
-#'        the number of patients treated at each dose level,
-#'        the average number of patients treated,
+#'        the number of participants treated at each dose level,
+#'        the average number of participants treated,
 #'        the percentage of overdosing assignment (POA),
 #'        the percentage of correct assignment (PCA),
 #'        the percentage of underdosing assignment (PUA),
 #'        the numbered index for the true MTD, respectively.
 #'
+#' (3) a list (\code{$setup}) containing user input parameters.
+#'
 #' @references Storer B. (1989). Design and analysis of phase i clinical trials, \emph{Biometrics}, 925–937.
 #'
 #' Yang, S., Wang, S.J. and Ji, Y., (2015). An integrated dose-finding tool for phase I trials in oncology. \emph{Contemporary clinical trials}, 45, pp.426-434.
-#'
 #'
 #' @examples
 #' run.sim.3(p.true = c(0.25, 0.41, 0.45, 0.49, 0.53),
@@ -103,7 +104,7 @@ run.sim.3 <- function (p.true,
                        seed = 6)
 {
 
-  # check inputs
+  ############################## Check inputs ##############################
   if (is.matrix(p.true) & is.matrix(mtd.true)){
     if (nrow(p.true) == nrow(mtd.true) & ncol(p.true) == ncol(mtd.true)){
       # number of scenarios
@@ -114,7 +115,7 @@ run.sim.3 <- function (p.true,
       stop("Warnings: please make sure the p.true and mtd.true have the same dimension!")
     }
   }
-  else if (is.vector(p.true) & is.vector(mtd.true)){
+  else if (is.vector(p.true) & is.vector(mtd.true) ){
     if (length(p.true) == length(mtd.true)){
       nscene = 1
       ndose = length(p.true)
@@ -129,6 +130,8 @@ run.sim.3 <- function (p.true,
     stop("Warnings: please make sure the p.true and mtd.true have the same dimension!")
   }
 
+  ############################## Step 1 #################################
+  ################### Enumerate through scenarios #######################
 
   # Initialize matrix for storage
   select.perc = matrix(rep(0, ndose * nscene), ncol = ndose)
@@ -136,7 +139,6 @@ run.sim.3 <- function (p.true,
   nptsdose = matrix(rep(0, ndose * nscene), ncol = ndose)
   npts = rep(0, nscene)
 
-  ################################# Step 1 #################################
   for (j in 1:nscene){
     set.seed(seed)
 
@@ -152,8 +154,7 @@ run.sim.3 <- function (p.true,
     # store MTD
     MTD = rep(0, ntrial)
 
-    ############################## Step 2 #################################
-
+    ################### Trial simulation starts #######################
     for (trial in 1:ntrial) {
 
       y <- rep(0, ndose)
@@ -169,9 +170,9 @@ run.sim.3 <- function (p.true,
       stop = 0
 
     while (stop == 0) {
-      #############################################################
-      ## 2) Accrue and treat three patients at the current dose: ##
-      #############################################################
+      #################################################################
+      ## 2) Accrue and treat three participants at the current dose: ##
+      #################################################################
 
       ### Generate random toxicity response
       xx <- 0
@@ -184,9 +185,9 @@ run.sim.3 <- function (p.true,
       y[d] <- y[d] + xx;
       n[d] <- n[d] + 3
 
-      ######################################################
-      ## 3a) If there are 3 patients at the current dose: ##
-      ######################################################
+      ##########################################################
+      ## 3a) If there are 3 participants at the current dose: ##
+      ##########################################################
       if (n[d] == 3){
 
         ##############
@@ -225,13 +226,13 @@ run.sim.3 <- function (p.true,
             earlystop = 1
             break
           }
-          #### Stop if the next-lower dose has 6 patients ####
+          #### Stop if the next-lower dose has 6 participants ####
           #### Declare MTD is the next lower dose
           else if (d > 1 & n[d-1] == 6){
             mtd_d_1 <- 1
             break
           }
-          #### If the next-lower dose has 3 patients ####
+          #### If the next-lower dose has 3 participants ####
           else if (d > 1 & n[d-1] == 3){
             #### D ####
             d = d - 1
@@ -240,9 +241,9 @@ run.sim.3 <- function (p.true,
         }
       }
 
-      ######################################################
-      ## 3b) If there are 6 patients at the current dose: ##
-      ######################################################
+      ##########################################################
+      ## 3b) If there are 6 participants at the current dose: ##
+      ##########################################################
 
       else if (n[d] == 6){
 
@@ -288,13 +289,13 @@ run.sim.3 <- function (p.true,
             earlystop = 1
             break
           }
-          #### Stop if the next-lower dose has 6 patients ####
+          #### Stop if the next-lower dose has 6 participants ####
           #### Declare MTD is the next lower dose
           else if (d > 1 & n[d-1] == 6){
             mtd_d_1 <- 1
             break
           }
-          #### If the next-lower dose has 3 patients ####
+          #### If the next-lower dose has 3 participants ####
           else if (d > 1 & n[d-1] == 3){
             #### D ####
             d = d - 1
@@ -302,39 +303,29 @@ run.sim.3 <- function (p.true,
 
         }
       }
-
-    #   total <- sum(n)
-    #   if(total >= ncohort*3){
-    #     stop <- 1
-    #   }
     }
 
-    ################################# Step 3 #################################
-    ## Select MTD
-    if (earlystop == 1) {
-      MTD[trial] = 99
-    }
-    if (mtd_d_1 == 1){
-      MTD[trial] = d-1
-    }
-    if (mtd_d == 1){
-      MTD[trial] = d
-    }
-    # if (stop == 1 & earlystop == 0 & mtd_d_1 == 0 & mtd_d == 0){
-    #   MTD[trial] = -1
-    # }
+      ################################# Step 2 #################################
+      ############################### Select MTD ###############################
+      if (earlystop == 1) {
+        MTD[trial] = 99
+      }
+      if (mtd_d_1 == 1){
+        MTD[trial] = d-1
+      }
+      if (mtd_d == 1){
+        MTD[trial] = d
+      }
 
       Y[trial, ] = y
       N[trial, ] = n
-
-    ##########################################################################################
   }
 
-    ################################# Step 4 #################################
-
-    nptsdose[j, ] = colMeans(N) #average number of patients
+    ################################# Step 3 #################################
+    ########################### Summarize metrics ############################
+    nptsdose[j, ] = colMeans(N) #average number of participants
     #nptsdose.perc = colMeans(N)/sum(colMeans(N))
-    npts[j] <- mean(rowSums(N)) #average total number of patients
+    npts[j] <- mean(rowSums(N)) #average total number of participants
 
     for (i in 1:ndose) {
       select.perc[j, i] = sum(MTD == i)/ntrial

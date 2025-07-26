@@ -19,7 +19,8 @@ In this vignette we will demonstrate how to use `FIND` package to compare the op
 Begin by loading the `FIND` library and dependencies:
 
 ```{r}
-library(FIND)
+rm(list=ls(all=TRUE))
+# library(FIND)
 # Dependencies
 library(ggplot2)
 library(dplyr)
@@ -32,8 +33,8 @@ library(gtable)
 # Main directory
 mainDir <- "/Users/oliviazhang/Desktop/"
 
-# library(miceadds)
-# source.all(paste0(mainDir, "/FIND/R"))
+library(miceadds)
+source.all(paste0(mainDir, "/FIND/R"))
 ```
 We provide several commonly used simulation scenarios.
 
@@ -77,66 +78,92 @@ For example:
 
 ```{r}
 # Run simulations for the 3+3 design
-oc_3plus3 <- run.sim.3(p.true = p.true,
-                       mtd.true = mtd.true, 
+oc_3plus3 <- run.sim.3(p.true = p.true["Scenario.5",],
+                       mtd.true = mtd.true[5,],
                        startdose = 1,
                        ntrial = 5000,
                        seed = 6)
+N <- oc_3plus3$N
 
 # Run simulations for the BOIN design
-oc_boin <- run.sim.b(p.true = p.true,
-                     mtd.true = mtd.true, 
-                     pT = 0.25,
-                     EI = c(0.15,0.35),
-                     ncohort = 12,
-                     cohortsize = 3,
-                     startdose = 1,
-                     DU.pp = 0.95,
-                     n.earlystop = 12,
-                     extrasafe = F,
-                     ntrial = 5000,
-                     seed = 6)
+oc_boin <- run.sim.boin(p.true = p.true["Scenario.5",],
+                        mtd.true = mtd.true[5,],
+                        pT = 0.25,
+                        EI = c(0.15,0.35),
+                        ncohort = 6,
+                        cohortsize = 3,
+                        startdose = 1,
+                        DU.pp = 0.95,
+                        #n.earlystop = 12,
+                        extrasafe = T,
+                        ntrial = 5000,
+                        seed = 6)
 
 # Run simulations for the i3+3 design
-oc_i3plus3 <- run.sim.i3(p.true = p.true,
-                         mtd.true = mtd.true, 
+oc_i3plus3 <- run.sim.i3(p.true = p.true["Scenario.5",],
+                         mtd.true = mtd.true[5,],
                          pT = 0.25,
                          EI = c(0.2,0.3),
-                         ncohort = 12,
+                         ncohort = 6,
                          cohortsize = 3,
                          startdose = 1,
                          DU.pp = 0.95,
                          #n.earlystop = 12,
-                         extrasafe = T,
+                         extrasafe = F,
                          ntrial = 5000,
                          seed = 6)
+
+# Run simulations for the G3 design
+oc_g3 <- run.sim.g3(p.true = p.true["Scenario.5",],
+                    mtd.true = mtd.true[5,],
+                    ncohort = 12,
+                    cohortsize = 3,
+                    startdose = 1,
+                    #n.earlystop = 12,
+                    ntrial = 5000,
+                    seed = 6)
+# 
+# # Run simulations for the mTPI2 design
+# oc_mtpi2 <- run.sim.mtpi2(p.true = p.true,
+#                           mtd.true = mtd.true,
+#                           pT = 0.25,
+#                           EI = c(0.2,0.3),
+#                           ncohort = 12,
+#                           cohortsize = 3,
+#                           startdose = 1,
+#                           #n.earlystop = 12,
+#                           ntrial = 5000,
+#                           seed = 6)
+
 ```
 
 Next, we call the `generate_oc_plot` function, which will automatically generate the plots of operating characteristics. 
 
 ```{r}
 plot <- generate_oc_plot(`3+3` = oc_3plus3,
+                         `G3` = oc_g3,
+                         # `mTPI2` = oc_mtpi2,
                          `BOIN` = oc_boin,
                          `i3+3` = oc_i3plus3)
 ```
 
 We can also save the plot the local directory using `ggsave` function from ggplot:
 ```{r}
-# #Create a new directory named “Results”
-# new.folder <- "Results"
-# dir.create(file.path(mainDir, new.folder))
-# #Create a new sub-directory named “Decision Tables”
-# new.subfolder <- "Operating Characteristics"
-# dir.create(file.path(mainDir, new.folder, new.subfolder))
-# 
-# ggsave(paste0(file.path(mainDir, new.folder, new.subfolder),"/oc_selection.jpg"),
-#        width = 12,
-#        height = 12,
-#        plot[[1]])
-# 
-# ggsave(paste0(file.path(mainDir, new.folder, new.subfolder),"/oc_allocation.jpg"),
-#        width = 12,
-#        height = 12,
-#        plot[[2]])
+#Create a new directory named “Results”
+new.folder <- "Results"
+dir.create(file.path(mainDir, new.folder))
+#Create a new sub-directory named “Decision Tables”
+new.subfolder <- "Operating Characteristics"
+dir.create(file.path(mainDir, new.folder, new.subfolder))
+
+ggsave(paste0(file.path(mainDir, new.folder, new.subfolder),"/oc_selection.jpg"),
+       width = 22,
+       height = 12,
+       plot[[1]])
+
+ggsave(paste0(file.path(mainDir, new.folder, new.subfolder),"/oc_allocation.jpg"),
+       width = 22,
+       height = 12,
+       plot[[2]])
 ```
 

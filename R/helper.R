@@ -96,10 +96,7 @@ create.legend <- function(method){
     if (method == "3+3"){
       valigned <- gtable_combine(E,Ei,S,DU,DUi,i,na,along=2)
     }
-    if (method == "i3+3"){
-      valigned <- gtable_combine(E.,S.,D.,DU., along=2)
-    }
-    if (method == "BOIN"){
+    if (method == "i3+3" | method == "BOIN" | method == "G3" | method == "mTPI2"){
       valigned <- gtable_combine(E.,S.,D.,DU., along=2)
     }
   }
@@ -122,15 +119,15 @@ add_features <- function(param,
 
   info <- data.frame(" " = rep(1,9))
   if ("3+3" %in% method){
-    info <- cbind(info, data.frame(`3+3` = c("not appliable",
-                                 "not appliable",
-                                 "not appliable",
+    info <- cbind(info, data.frame(`3+3` = c("Not applicable",
+                                 "Not applicable",
+                                 "Not applicable",
                                  param$`3+3`$startdose,
                                  param$`3+3`$cohortsize,
                                  param$`3+3`$ncohort,
-                                 "not appliable",
-                                 "not appliable",
-                                 "not appliable"),
+                                 "Not applicable",
+                                 "Not applicable",
+                                 "Not applicable"),
                                  check.names = F))
   }
   if ("BOIN" %in% method){
@@ -145,10 +142,27 @@ add_features <- function(param,
                                        "Yes, if the isotonically-transformed posterior\nmean of the selected MTD\nis above the EI,\nselect the next lower dose as the final MTD",
                                        "No"),
                                 ifelse(param$`BOIN`$n.earlystop < param$`BOIN`$cohortsize * param$`BOIN`$ncohort,
-                                       paste0("Yes, if the number of patients\ntreated at the current dose\nreaches ", param$`BOIN`$n.earlystop, ",\nstop the trial and select the MTD\nbased on the observed data"),
+                                       paste0("Yes, if the number of participants\ntreated at the current dose\nreaches ", param$`BOIN`$n.earlystop, ",\nstop the trial and select the MTD\nbased on the observed data"),
                                        "No")
                      ),
                      check.names = F))
+  }
+  if ("mTPI2" %in% method){
+    info <- cbind(info, data.frame(`mTPI2` = c(param$`mTPI2`$pT,
+                                              paste0("[", param$`mTPI2`$EI[1], ", ", param$`mTPI2`$EI[2],")"),
+                                              paste0("Not applicable"),
+                                              param$`mTPI2`$startdose,
+                                              param$`mTPI2`$cohortsize,
+                                              param$`mTPI2`$ncohort,
+                                              param$`mTPI2`$DU.pp,
+                                              ifelse(param$`mTPI2`$extrasafe == T,
+                                                     "Yes, if the isotonically-transformed posterior\nmean of the selected MTD\nis above the EI,\nselect the next lower dose as the final MTD",
+                                                     "No"),
+                                              ifelse(param$`mTPI2`$n.earlystop < param$`mTPI2`$cohortsize * param$`mTPI2`$ncohort,
+                                                     paste0("Yes, if the number of participants\ntreated at the current dose\nreaches ", param$`mTPI2`$n.earlystop, ",\nstop the trial and select the MTD\nbased on the observed data"),
+                                                     "No")
+    ),
+    check.names = F))
   }
   if ("i3+3" %in% method){
     info <- cbind(info, data.frame(`i3+3` = c(param$`i3+3`$pT,
@@ -162,28 +176,47 @@ add_features <- function(param,
                                        "Yes, if the isotonically-transformed posterior\nmean of the selected MTD\nis above the EI,\nselect the next lower dose as the final MTD",
                                        "No"),
                                 ifelse(param$`i3+3`$n.earlystop < param$`i3+3`$cohortsize * param$`i3+3`$ncohort,
-                                       paste0("Yes, if the number of patients\ntreated at the current dose\nreaches ", param$`BOIN`$n.earlystop, ",\nstop the trial and select the MTD\nbased on the observed data"),
+                                       paste0("Yes, if the number of participants\ntreated at the current dose\nreaches ", param$`BOIN`$n.earlystop, ",\nstop the trial and select the MTD\nbased on the observed data"),
                                        "No")),
                      check.names = F))
+  }
+  if ("G3" %in% method){
+    info <- cbind(info, data.frame(`G3` = c("0.25",
+                                            c("[0.2, 1/3]\n[0.2, 0.29]"),
+                                            c("0.2, 1/3\n0.2, 0.29"),
+                                            param$`G3`$startdose,
+                                            param$`G3`$cohortsize,
+                                            param$`G3`$ncohort,
+                                            param$`G3`$DU.pp,
+                                            "Not applicable",
+                                            ifelse(param$`G3`$n.earlystop < param$`G3`$cohortsize * param$`G3`$ncohort,
+                                                   paste0("Yes, if the number of participants\ntreated at the current dose\nreaches ", param$`G3`$n.earlystop, ",\nstop the trial and select the MTD\nbased on the observed data"),
+                                                   "No")),
+                                   check.names = F))
   }
 
   info <- data.frame(info[, method],
                      check.names = F)
   colnames(info) <- method
 
-  row.names(info) <- c(paste0("p","[","T","]"),
-                       "EI", "Boundary", "Start Dose", "Cohort Size", "Number of Cohorts",
-                       "The Cutoff\nto Eliminate\nAn Overly Toxic Dose:",
-                       "Whether to Implement the\nExtra Safety Rule",
-                       "Whether to Implement the\nExtra Stopping Rule")
+  # row.names(info) <- c(paste0("p","[","T","]"),
+  #                      "EI", "Boundary", "Start Dose", "Cohort Size", "Number of Cohorts",
+  #                      "The Cutoff\nto Eliminate\nAn Overly Toxic Dose:",
+  #                      "Whether to Implement the\nExtra Safety Rule",
+  #                      "Whether to Implement the\nExtra Stopping Rule")
 
   ################# Create grob for info table #################
   info.grob <- tableGrob(info, theme=ttheme_default(base_size = 6,
                                                     core = list(fg_params=list(fontface="bold",
                                                                                hjust = 0.5, x=0.5, vjust = 0.5, col="black")),
-                                                    rowhead = list(fg_params=list(parse=TRUE,
-                                                                                  fontface="bold",
-                                                                                  hjust = 0.5, x=0.5, col="black"))))
+                                                    rowhead = list(fg_params = list(hjust = 0.5, x = 0.5, col = "black", fontface = "bold"),  # Ensure bold text
+                                                                   bg_params = list(fill = "lightgray"))  # Set background color and border color),
+                                                    ),
+                         rows = list(expression(p[T]),
+                                     "EI", "Boundary", "Start Dose", "Cohort Size", "Number of Cohorts",
+                                     "The Cutoff\nto Eliminate\nAn Overly Toxic Dose:",
+                                     "Whether to Implement the\nExtra Safety Rule",
+                                     "Whether to Implement the\nExtra Stopping Rule"))
 
   #add out border
   info.grob <- gtable_add_grob(info.grob,

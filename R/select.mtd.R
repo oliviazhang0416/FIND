@@ -1,7 +1,7 @@
 #'
-#' Select the maximum tolerated dose (MTD)
+#' Select the maximum tolerated dose (MTD) using isotonic regression
 #'
-#' Select the maximum tolerated dose (MTD) when the trial is completed
+#' Select the maximum tolerated dose (MTD) when the trial is completed using isotonic regression
 #'
 #' @usage select.mtd(method,
 #'                   pT,
@@ -11,11 +11,11 @@
 #'                   DU.pp=0.95,
 #'                   extrasafe = F)
 #'
-#' @param method the design name.
+#' @param method the design name; only i3+3 and BOIN are accepted.
 #' @param pT a numeric value; the target DLT rate.
 #' @param EI a vector which specifies the equivalence interval (EI).
-#' @param n_obs a vector containing the number of patients treated at each dose level.
-#' @param y_obs a vector containing the number of patients who experienced dose-limiting toxicity at each dose level.
+#' @param n_obs a vector containing the number of participants treated at each dose level.
+#' @param y_obs a vector containing the number of participants who experienced dose-limiting toxicity at each dose level.
 #' @param DU.pp a numeric value; the cutoff to remove an overly toxic dose for safety.
 #'              We recommend the default value of (\code{DU.pp=0.95}) for general use.
 #' @param extrasafe a logical value which specifies whether to implement a more strict safety rule.
@@ -38,6 +38,12 @@ select.mtd <- function (method,
                         DU.pp = 0.95,
                         extrasafe = F)
 {
+  if (method != "BOIN" & method != "i3+3" & method != "mTPI2") {
+    stop("Warnings: only i3+3, BOIN and mTPI2 are accepted.")
+  }
+  if (method == "mTPI2" & extrasafe == T) {
+    stop("Warnings: extra safety rule argument is only accepted for i3+3 and BOIN.")
+  }
 
   pava <- function (x, wt = rep(1, length(x)))
   {
@@ -84,44 +90,47 @@ select.mtd <- function (method,
     selectdose = 99
   }
   else {
-    #### Find the non-DU doses ####
-    adm.set = (n != 0) & (doses == 0)
-    adm.index = which(adm.set == T)
 
-    y.adm = y[adm.set]
-    n.adm = n[adm.set]
+      #### Find the non-DU doses ####
+      adm.set = (n != 0) & (doses == 0)
+      adm.index = which(adm.set == T)
 
-    #### Posterior mean ####
-    phat = (y.adm + 0.05)/(n.adm + 0.1)
-    phat.var = (y.adm + 0.05) * (n.adm - y.adm + 0.05)/((n.adm + 0.1)^2 * (n.adm + 0.1 + 1))
+      y.adm = y[adm.set]
+      n.adm = n[adm.set]
 
-    #### Isotonic-transformed posterior means ####
-    phat = pava(phat, wt = 1/phat.var)
-    phat = phat + (1:length(phat)) * 1e-10
-    ## by adding an increasingly small number to tox prob at higher doses,
-    ## it will break the ties and make the lower dose level the MTD if the ties were larger than pT
-    ## or make the higher dose level the MTD if the ties are smaller than pT
+      #### Posterior mean ####
+      phat = (y.adm + 0.05)/(n.adm + 0.1)
+      phat.var = (y.adm + 0.05) * (n.adm - y.adm + 0.05)/((n.adm + 0.1)^2 * (n.adm + 0.1 + 1))
 
-    #### Find the index of the smallest diff(posterior means, pT)
-    selectd = sort(abs(phat - pT), index.return = T)$ix[1]
-    selectdose = adm.index[selectd]
+      #### Isotonic-transformed posterior means ####
+      phat = pava(phat, wt = 1/phat.var)
+      phat = phat + (1:length(phat)) * 1e-10
+      ## by adding an increasingly small number to tox prob at higher doses,
+      ## it will break the ties and make the lower dose level the MTD if the ties were larger than pT
+      ## or make the higher dose level the MTD if the ties are smaller than pT
 
-    if (method == "BOIN"){
-      thres <- log((1 - pT)/(1 - EI[2]))/log(EI[2] * (1 - pT)/(pT * (1 - EI[2])))
-    }
-    else if (method == "i3+3"){
-      thres <- EI[2]
-    }
-    ##******************* Edit Jan. 27, 2023  ************###############
-    if(phat[selectd] > thres & extrasafe == T){
-      if (selectdose > 1){
-        selectdose = selectdose-1
-      }
-      else{
-        selectdose = 99
-      }
-    }
-    ##*******************##*******************##*******************####
+      #### Find the index of the smallest diff(posterior means, pT)
+      selectd = sort(abs(phat - pT), index.return = T)$ix[1]
+      selectdose = adm.index[selectd]
+
+      ##******************* Edit Jan. 27, 2023  ************###############
+      if(extrasafe == T){
+        if (method == "BOIN"){
+          thres <- log((1 - pT)/(1 - EI[2]))/log(EI[2] * (1 - pT)/(pT * (1 - EI[2])))
+        }
+        else if (method == "i3+3"){
+          thres <- EI[2]
+        }
+
+        if(phat[selectd] > thres){
+          if (selectdose > 1){
+            selectdose = selectdose-1
+            }
+          else{
+            selectdose = 99
+        }}}
+      ##*******************##*******************##*******************####
+
   }
 
 
