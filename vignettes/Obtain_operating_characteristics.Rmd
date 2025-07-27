@@ -20,7 +20,10 @@ Begin by loading the `FIND` library and dependencies:
 
 ```{r}
 rm(list=ls(all=TRUE))
-# library(FIND)
+# first install from github
+# install.packages("devtools")
+# devtools::install_github("oliviazhang0416/FIND")
+library(FIND)
 # Dependencies
 library(ggplot2)
 library(dplyr)
@@ -31,10 +34,8 @@ library(gtable)
 
 ```{r}
 # Main directory
-mainDir <- "/Users/oliviazhang/Desktop/"
-
-library(miceadds)
-source.all(paste0(mainDir, "/FIND/R"))
+mainDir <- "/Users/yourname/Desktop/" # Mac users
+# mainDir <- "C:/Users/yourname/Desktop/"  # Windows users
 ```
 We provide several commonly used simulation scenarios.
 
@@ -150,20 +151,20 @@ plot <- generate_oc_plot(`3+3` = oc_3plus3,
 We can also save the plot the local directory using `ggsave` function from ggplot:
 ```{r}
 #Create a new directory named “Results”
-new.folder <- "Results"
-dir.create(file.path(mainDir, new.folder))
+# new.folder <- "Results"
+# dir.create(file.path(mainDir, new.folder))
 #Create a new sub-directory named “Decision Tables”
-new.subfolder <- "Operating Characteristics"
-dir.create(file.path(mainDir, new.folder, new.subfolder))
-
-ggsave(paste0(file.path(mainDir, new.folder, new.subfolder),"/oc_selection.jpg"),
-       width = 22,
-       height = 12,
-       plot[[1]])
-
-ggsave(paste0(file.path(mainDir, new.folder, new.subfolder),"/oc_allocation.jpg"),
-       width = 22,
-       height = 12,
-       plot[[2]])
+# new.subfolder <- "Operating Characteristics"
+# dir.create(file.path(mainDir, new.folder, new.subfolder))
+# 
+# ggsave(paste0(file.path(mainDir, new.folder, new.subfolder),"/oc_selection.jpg"),
+#        width = 22,
+#        height = 12,
+#        plot[[1]])
+# 
+# ggsave(paste0(file.path(mainDir, new.folder, new.subfolder),"/oc_allocation.jpg"),
+#        width = 22,
+#        height = 12,
+#        plot[[2]])
 ```
 
