@@ -9,11 +9,11 @@
 #'                         `i3+3` = NULL,
 #'                         `G3` = NULL)
 #'
-#' @param 3+3 the object returned by run.sim.3()
-#' @param BOIN the object returned by run.sim.boin()
-#' @param mTPI2 the object returned by run.sim.mtpi2()
-#' @param i3+3 the object returned by run.sim.i3()
-#' @param G3 the object returned by run.sim.g3()
+#' @param 3+3 the object returned by run_sim_threethree()
+#' @param BOIN the object returned by run_sim_boin()
+#' @param mTPI2 the object returned by run_sim_mtpi2()
+#' @param i3+3 the object returned by run_sim_i3()
+#' @param G3 the object returned by run_sim_g3()
 #'
 #' @return \code{generate_oc_plot()} returns figures displaying the operating characteristics for the user-specified design(s).
 #'
@@ -40,24 +40,29 @@ generate_oc_plot <- function(`3+3` = NULL,
                                           !is.null(`i3+3`),
                                           !is.null(`G3`))]
 
-  # Check
+  # Check inputs
+  if (is.null(`3+3`) && is.null(`BOIN`) && is.null(`mTPI2`) &&
+      is.null(`i3+3`) && is.null(`G3`)) {
+    stop("At least one design must be provided")
+  }
+
   if(length(method) != sum(!is.null(`3+3`),!is.null(`BOIN`),!is.null(`mTPI2`),!is.null(`i3+3`), !is.null(`G3`))){
-    stop("Warnings: Please double check the input(s)!")
+    stop("Input mismatch detected. Please check that each non-NULL input matches its method")
   }
   if("3+3" %in% method & (is.null(`3+3`))){
-    stop("Warnings: Please double check the input(s)!")
+    stop("3+3 method selected but corresponding input is NULL")
   }
   if("BOIN" %in% method & (is.null(`BOIN`))){
-    stop("Warnings: Please double check the input(s)!")
+    stop("BOIN method selected but corresponding input is NULL")
   }
   if("mTPI2" %in% method & (is.null(`mTPI2`))){
-    stop("Warnings: Please double check the input(s)!")
+    stop("mTPI2 method selected but corresponding input is NULL")
   }
   if("i3+3" %in% method & (is.null(`i3+3`))){
-    stop("Warnings: Please double check the input(s)!")
+    stop("i3+3 method selected but corresponding input is NULL")
   }
   if("G3" %in% method & (is.null(`G3`))){
-    stop("Warnings: Please double check the input(s)!")
+    stop("G3 method selected but corresponding input is NULL")
   }
 
 
@@ -157,7 +162,7 @@ generate_oc_plot <- function(`3+3` = NULL,
             panel.grid.minor = element_blank(),
             panel.background = element_rect(fill = "grey80"),
             strip.background =element_rect(fill="grey70"),
-            axis.ticks = element_line(colour = "black", size = 0.1),
+            axis.ticks = element_line(colour = "black", linewidth = 0.1),
             axis.line = element_line(colour = "black", linewidth = 0.1),
             axis.title = element_text(size=8),
             text=element_text(size=8),

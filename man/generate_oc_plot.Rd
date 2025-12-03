@@ -11,15 +11,15 @@ generate_oc_plot(`3+3` = NULL,
                         `G3` = NULL)
 }
 \arguments{
-\item{3+3}{the object returned by run.sim.3()}
+\item{3+3}{the object returned by run_sim_threethree()}
 
-\item{BOIN}{the object returned by run.sim.boin()}
+\item{BOIN}{the object returned by run_sim_boin()}
 
-\item{mTPI2}{the object returned by run.sim.mtpi2()}
+\item{mTPI2}{the object returned by run_sim_mtpi2()}
 
-\item{i3+3}{the object returned by run.sim.i3()}
+\item{i3+3}{the object returned by run_sim_i3()}
 
-\item{G3}{the object returned by run.sim.g3()}
+\item{G3}{the object returned by run_sim_g3()}
 }
 \value{
 \code{generate_oc_plot()} returns figures displaying the operating characteristics for the user-specified design(s).

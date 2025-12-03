@@ -11,15 +11,15 @@ generate_decision_table(`3+3` = NULL,
                                `G3` = NULL)
 }
 \arguments{
-\item{3+3}{the object returned by get.decision.3()}
+\item{3+3}{the object returned by get_decision_3plus3()}
 
-\item{BOIN}{the object returned by get.decision.boin()}
+\item{BOIN}{the object returned by get_decision_boin()}
 
-\item{mTPI2}{the object returned by get.decision.mtpi2()}
+\item{mTPI2}{the object returned by get_decision_mtpi2()}
 
-\item{i3+3}{the object returned by get.decision.i3()}
+\item{i3+3}{the object returned by get_decision_i3plus3()}
 
-\item{G3}{the object returned by get.decision.g3()}
+\item{G3}{the object returned by get_decision_g3plus3()}
 }
 \value{
 \code{generate_decision_table()} returns a figure displaying the decision table(s) for the user-specified design(s).

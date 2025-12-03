@@ -9,11 +9,11 @@
 #'                                `i3+3` = NULL,
 #'                                `G3` = NULL)
 #'
-#' @param 3+3 the object returned by get.decision.3()
-#' @param BOIN the object returned by get.decision.boin()
-#' @param mTPI2 the object returned by get.decision.mtpi2()
-#' @param i3+3 the object returned by get.decision.i3()
-#' @param G3 the object returned by get.decision.g3()
+#' @param 3+3 the object returned by get_decision_3plus3()
+#' @param BOIN the object returned by get_decision_boin()
+#' @param mTPI2 the object returned by get_decision_mtpi2()
+#' @param i3+3 the object returned by get_decision_i3plus3()
+#' @param G3 the object returned by get_decision_g3plus3()
 #'
 #' @return \code{generate_decision_table()} returns a figure displaying the decision table(s) for the user-specified design(s).
 #'
@@ -50,24 +50,29 @@ generate_decision_table <- function(`3+3` = NULL,
 
   method <- unique(tab.store$method)[order(match(unique(tab.store$method),c("3+3","BOIN","mTPI2","i3+3","G3")))]
 
-  # Check
+  # Check inputs
+  if (is.null(`3+3`) && is.null(`BOIN`) && is.null(`mTPI2`) &&
+      is.null(`i3+3`) && is.null(`G3`)) {
+    stop("At least one design must be provided")
+  }
+
   if(length(method) != sum(!is.null(`3+3`),!is.null(`BOIN`),!is.null(`mTPI2`),!is.null(`i3+3`),!is.null(`G3`))){
-    stop("Warnings: Please double check the input(s)!")
+    stop("Input mismatch detected. Please check that each non-NULL input matches its method")
   }
   if("3+3" %in% method & (is.null(`3+3`))){
-    stop("Warnings: Please double check the input(s)!")
+    stop("3+3 method selected but corresponding input is NULL")
   }
   if("BOIN" %in% method & (is.null(`BOIN`))){
-    stop("Warnings: Please double check the input(s)!")
+    stop("BOIN method selected but corresponding input is NULL")
   }
   if("mTPI2" %in% method & (is.null(`mTPI2`))){
-    stop("Warnings: Please double check the input(s)!")
+    stop("mTPI2 method selected but corresponding input is NULL")
   }
   if("i3+3" %in% method & (is.null(`i3+3`))){
-    stop("Warnings: Please double check the input(s)!")
+    stop("i3+3 method selected but corresponding input is NULL")
   }
   if("G3" %in% method & (is.null(`G3`))){
-    stop("Warnings: Please double check the input(s)!")
+    stop("G3 method selected but corresponding input is NULL")
   }
 
   # Applying this to all sublists in setup.store
@@ -80,7 +85,7 @@ generate_decision_table <- function(`3+3` = NULL,
 
   check_npts <- as.numeric(check_npts)
   if (!all(check_npts == check_npts[1])){
-    stop("Warnings: Please make sure the numbers of participants are consistent for each method!")
+    stop("Number of participants must be consistent across all methods")
   }
 
   npts <- max(tab.store$n)

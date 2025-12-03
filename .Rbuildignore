@@ -1,3 +1,10 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
+^\.git$
+^\.gitignore$
+^\.DS_Store$
+^\.Rhistory$
+^\.claude$
+^cran-comments\.md$
+^\.github$

@@ -1,0 +1,279 @@
+---
+title: "FIND Package Guidance"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{FIND Package Guidance}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  eval = FALSE  # Set to TRUE when running
+)
+```
+
+## Introduction
+
+The FIND package provides tools for working with Phase I dose-finding trial designs. This vignette demonstrates how to use the package for the following designs: 3plus3, i3plus3, g3, boin, and mtpi2.
+
+```{r}
+library(FIND)
+```
+
+## Function Dependencies
+
+The package functions follow a hierarchical structure:
+
+```
+design_*()
+    │
+    ├──> get_decision()
+    │         │
+    │         └──> decision_table()
+    │
+    └──> run_simulation()
+              │
+              └──> oc_plot()
+```
+
+- **Design constructors** (`design_3plus3()`, `design_i3plus3()`, `design_g3plus3()`, `design_mtpi2()`, `design_boin()`): Create design objects that store all parameters.
+- **`get_decision()`**: Takes a design object and generates decision tables.
+- **`decision_table()`**: Takes multiple design objects and generates comparison plots.
+- **`run_simulation()`**: Takes a design object plus toxicity scenarios and runs simulations.
+- **`oc_plot()`**: Takes multiple simulation results and generates operating characteristic plots.
+
+## Part 1: Generating Decision Tables
+
+Decision tables provide the dose escalation/de-escalation rules for each design.
+
+### Creating Design Objects
+
+First, create design objects with the desired parameters:
+
+```{r}
+# Create a 3plus3 design
+design_3 <- design_3plus3(
+  npts = 12,
+  ncohort = 10,
+  cohortsize = 3
+)
+
+# Create an i3plus3 design
+design_i3 <- design_i3plus3(
+  pT = 0.25,
+  EI = c(0.2, 0.3),
+  npts = 12,
+  ncohort = 10,
+  cohortsize = 3
+)
+
+# Print the design
+print(design_3)
+print(design_i3)
+```
+
+### Generating Decision Tables for Individual Designs
+
+Use `get_decision()` to generate decision tables:
+
+```{r}
+# Generate decision table for 3plus3
+decision_3 <- get_decision(design_3)
+
+# Generate decision table for i3plus3
+decision_i3 <- get_decision(design_i3)
+
+# View the decision table
+head(decision_3$tab)
+head(decision_i3$tab)
+```
+
+### Comparing Decision Tables Across Designs
+
+The `decision_table()` function generates comparison plots for multiple designs:
+
+```{r}
+# Compare decision tables for 3plus3 and i3plus3
+decision_table(design_3, design_i3)
+```
+
+This generates a comprehensive comparison plot showing decision rules side-by-side.
+
+### Saving Decision Table Plots
+
+To save the generated plots, use `ggsave()`. By default, plots are saved to a newly created folder with a timestamp in the current working directory:
+
+```{r}
+# Create output folder with timestamp
+output_folder <- paste0("FIND_output_", format(Sys.time(), "%Y%m%d_%H%M%S"))
+dir.create(output_folder, showWarnings = FALSE)
+
+# Generate and save decision table plot
+p <- decision_table(design_3, design_i3)
+ggsave(
+  filename = file.path(output_folder, "decision_table_comparison.png"),
+  plot = p,
+  width = 10,
+  height = 6,
+  dpi = 300
+)
+```
+
+### Other Designs
+
+You can also create other design objects:
+
+```{r}
+# g3 design
+design_g3 <- design_g3plus3(
+  npts = 12,
+  ncohort = 10,
+  cohortsize = 3
+)
+
+# mtpi2 design
+design_mtpi <- design_mtpi2(
+  pT = 0.25,
+  EI = c(0.2, 0.3),
+  npts = 12,
+  ncohort = 10
+)
+
+# boin design
+design_b <- design_boin(
+  pT = 0.25,
+  EI = c(0.15, 0.35),
+  npts = 12,
+  ncohort = 10,
+  cohortsize = 3
+)
+
+# Compare all designs
+decision_table(design_3, design_i3, design_g3, design_mtpi, design_b)
+```
+
+## Part 2: Running Simulations
+
+Simulations evaluate the operating characteristics of each design under different toxicity scenarios.
+
+### Setting Up Simulations
+
+Define the true toxicity probabilities and the true MTD:
+
+```{r}
+# Define toxicity scenario
+p.true <- c(0.05, 0.10, 0.20, 0.30, 0.45)
+mtd.true <- c(0, 0, 1, 0, 0)  # Dose 3 is MTD
+```
+
+### Running Simulations for Individual Designs
+
+Use `run_simulation()` to run simulations:
+
+```{r}
+# Run simulation for 3plus3
+sim_3 <- run_simulation(design_3, p.true = p.true, mtd.true = mtd.true)
+
+# Run simulation for i3plus3
+sim_i3 <- run_simulation(design_i3, p.true = p.true, mtd.true = mtd.true)
+
+# View results
+sim_3$selection
+sim_3$allocation
+
+sim_i3$selection
+sim_i3$allocation
+```
+
+### Multiple Scenario Simulations
+
+You can run simulations across multiple toxicity scenarios using matrix format:
+
+```{r}
+# Define multiple scenarios
+p.true <- matrix(
+  c(0.05, 0.10, 0.20, 0.30, 0.45,
+    0.10, 0.15, 0.25, 0.35, 0.50),
+  nrow = 2, byrow = TRUE
+)
+
+mtd.true <- matrix(
+  c(0, 0, 1, 0, 0,
+    0, 0, 1, 0, 0),
+  nrow = 2, byrow = TRUE
+)
+
+# Run simulations
+sim_3 <- run_simulation(design_3, p.true = p.true, mtd.true = mtd.true)
+sim_i3 <- run_simulation(design_i3, p.true = p.true, mtd.true = mtd.true)
+```
+
+### Using Pre-defined Scenarios
+
+The package provides pre-defined toxicity scenarios:
+
+```{r}
+# Load pre-defined scenarios
+scenarios <- load_true(pT = 0.25)
+
+# Use a specific scenario
+p.true <- scenarios[["FFP-BOIN provided"]][["p.true"]][5,]
+mtd.true <- c(0, 0, 0, 0, 1, 0)  # Dose 5 is MTD
+
+# Run simulations
+sim_3 <- run_simulation(design_3, p.true = p.true, mtd.true = mtd.true)
+sim_i3 <- run_simulation(design_i3, p.true = p.true, mtd.true = mtd.true)
+```
+
+### Comparing Operating Characteristics
+
+Use `oc_plot()` to compare operating characteristics across designs:
+
+```{r}
+# Compare OC plots for 3plus3 and i3plus3
+oc_plot(sim_3, sim_i3)
+```
+
+### Saving Operating Characteristic Plots
+
+To save the OC plots:
+
+```{r}
+# Create output folder with timestamp (if not already created)
+output_folder <- paste0("FIND_output_", format(Sys.time(), "%Y%m%d_%H%M%S"))
+dir.create(output_folder, showWarnings = FALSE)
+
+# Generate and save OC plot
+p <- oc_plot(sim_3, sim_i3)
+ggsave(
+  filename = file.path(output_folder, "oc_plot_comparison.png"),
+  plot = p,
+  width = 12,
+  height = 8,
+  dpi = 300
+)
+```
+
+### Modifying Simulation Parameters
+
+Design objects can include additional simulation parameters:
+
+```{r}
+# Create design with specific simulation settings
+design_i3_custom <- design_i3plus3(
+  pT = 0.25,
+  EI = c(0.2, 0.3),
+  npts = 12,
+  ncohort = 15,          # More cohorts
+  cohortsize = 3,
+  ntrial = 1000,         # Number of simulation trials
+  n.earlystop = 18,      # Early stopping parameter
+  extrasafe = TRUE       # Extra safety rule
+)
+
+# Run simulation with custom settings
+sim_i3_custom <- run_simulation(design_i3_custom, p.true = p.true, mtd.true = mtd.true)
+```
