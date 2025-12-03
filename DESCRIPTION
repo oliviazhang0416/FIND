@@ -1,19 +1,23 @@
 Package: FIND
 Type: Package
-Title: Compare Objective Decision Tables for Phase I Dose-Finding Designs
+Title: Objective Comparison of Phase I Dose-Finding Designs
 Version: 0.1.1
-Authors@R: person(given = "Yunxuan",
-                  family = "Zhang",
-                  role = c("aut", "cre"),
-                  email = "yunxuanz@uchicago.edu")
-Description: Provides tools to compare decision tables and operating
-    characteristics for phase I dose-finding trial designs, including the
-    traditional 3+3 design, the Bayesian Optimal Interval (BOIN) design
-    (Liu and Yuan (2015) <doi:10.1111/rssc.12089>), the modified Toxicity
-    Probability Interval-2 (mTPI-2) design, the interval 3+3 (i3+3) design,
-    and the Generalized 3+3 (G3) design. Functions are provided to generate
-    decision tables and operating characteristic plots for objective comparison
-    of these methods.
+Authors@R: c(
+    person(given = "Yuan",
+           family = "Ji",
+           role = "aut",
+           email = "yji@bsd.uchicago.edu"),
+    person(given = "Yunxuan",
+           family = "Zhang",
+           role = c("aut", "cre"),
+           email = "yunxuanz@uchicago.edu"))
+Description: Generate decision tables and simulate operating characteristics
+    for phase I dose-finding designs to enable objective comparison across
+    methods. Supported designs include the traditional 3+3, Bayesian Optimal
+    Interval (BOIN), modified Toxicity Probability Interval-2 (mTPI-2),
+    interval 3+3 (i3+3), and Generalized 3+3 (G3). Provides visualization
+    tools for comparing decision rules and operating characteristics across
+    multiple designs simultaneously.
 Encoding: UTF-8
 Language: en-US
 License: MIT + file LICENSE
