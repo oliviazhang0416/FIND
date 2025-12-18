@@ -94,7 +94,7 @@ get_decision_boin <- function(pT = NULL,
 
     for (y in 0:n){
 
-      elim_p <- pbeta(pT, y + 1, n - y + 1, lower.tail = F)
+      elim_p <- pbeta(pT, y + 1, n - y + 1, lower.tail = FALSE)
 
       if (elim_p > 0.95){
         store <- c(store, "DU")

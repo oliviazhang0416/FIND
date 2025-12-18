@@ -1,3 +1,14 @@
+## Resubmission
+
+This is a resubmission. In this version I have:
+
+* Added references to the DESCRIPTION file with DOIs for the methods:
+  - BOIN: Liu and Yuan (2015) <doi:10.1158/1078-0432.CCR-14-1526>
+  - mTPI-2: Guo et al. (2017) <doi:10.1002/sim.7185>
+  - i3+3: Liu et al. (2020) <doi:10.1177/0962280220939123>
+
+* Replaced all instances of T/F with TRUE/FALSE throughout the package.
+
 ## R CMD check results
 
 0 errors | 0 warnings | 1 note
@@ -12,11 +23,3 @@
 * GitHub Actions: ubuntu-latest, R devel
 * GitHub Actions: ubuntu-latest, R release
 * GitHub Actions: ubuntu-latest, R oldrel-1
-
-## Notes
-
-This is the first submission of the FIND package to CRAN. The package provides
-tools for comparing Phase I dose-finding trial designs, including decision
-tables and operating characteristics.
-
-The only NOTE is for "New submission" which is expected.

@@ -63,7 +63,7 @@ get_decision_g3plus3 <- function(npts = 12){
 
     for (y in 0:n){
 
-      elim_p <- pbeta(pT, y + 1, n - y + 1, lower.tail = F)
+      elim_p <- pbeta(pT, y + 1, n - y + 1, lower.tail = FALSE)
 
       if (elim_p > 0.95){
         store <- c(store, "DU")

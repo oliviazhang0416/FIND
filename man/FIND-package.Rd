@@ -71,4 +71,13 @@ Contemporary Clinical Trials, 58, 23-33.
 Liu, M., Wang, S. J., and Ji, Y. (2020). The i3+3 design for phase I clinical
 trials. Journal of Biopharmaceutical Statistics, 30(2), 294-304.
 }
+\author{
+\strong{Maintainer}: Yunxuan Zhang \email{yunxuanz@uchicago.edu}
+
+Authors:
+\itemize{
+  \item Yuan Ji \email{yji@bsd.uchicago.edu}
+}
+
+}
 \keyword{internal}

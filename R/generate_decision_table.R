@@ -204,25 +204,25 @@ generate_decision_table <- function(`3+3` = NULL,
       sidebox <- data.frame(`BOIN` = c(setup.store$`BOIN`$pT,
                                        setup.store$`BOIN`$EI,
                                        setup.store$`BOIN`$boundary),
-                            check.names = F)
+                            check.names = FALSE)
     }
     else if (method == "i3+3"){
       sidebox <- data.frame(`i3+3` = c(setup.store$`i3+3`$pT,
                                        setup.store$`i3+3`$EI,
                                        setup.store$`i3+3`$boundary),
-                            check.names = F)
+                            check.names = FALSE)
     }
     else if (method == "G3"){
       sidebox <- data.frame(`G3` = c(setup.store$`G3`$pT,
                                      setup.store$`G3`$EI,
                                      setup.store$`G3`$boundary),
-                            check.names = F)
+                            check.names = FALSE)
     }
     else if (method == "mTPI2"){
       sidebox <- data.frame(`mTPI2` = c(setup.store$`mTPI2`$pT,
                                         setup.store$`mTPI2`$EI,
                                         setup.store$`mTPI2`$boundary),
-                            check.names = F)
+                            check.names = FALSE)
     }
 
     ################# Create grob for info table #################

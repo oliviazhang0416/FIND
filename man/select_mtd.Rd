@@ -10,7 +10,7 @@ select_mtd(method,
                   n_obs,
                   y_obs,
                   DU.pp=0.95,
-                  extrasafe = F)
+                  extrasafe = FALSE)
 }
 \arguments{
 \item{method}{the design name; only i3+3 and BOIN are accepted.}

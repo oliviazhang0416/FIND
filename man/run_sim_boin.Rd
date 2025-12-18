@@ -99,7 +99,7 @@ Denote the current dose \eqn{d}. Let \eqn{n_d} and \eqn{y_d} represent the
          dose reaches \code{n.earlystop}.
 
          For some applications, investigators may prefer a more strict safety rule for MTD selection
-         (This can be achieved by setting \code{extrasafe} == T). If the isotonically-transformed
+         (This can be achieved by setting \code{extrasafe} == TRUE). If the isotonically-transformed
          posterior mean of the selected MTD is above the EI, select the next lower dose as the final MTD.
 }
 \examples{

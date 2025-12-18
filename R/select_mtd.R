@@ -9,7 +9,7 @@
 #'                   n_obs,
 #'                   y_obs,
 #'                   DU.pp=0.95,
-#'                   extrasafe = F)
+#'                   extrasafe = FALSE)
 #'
 #' @param method the design name; only i3+3 and BOIN are accepted.
 #' @param pT a numeric value; the target DLT rate.
@@ -36,7 +36,7 @@ select_mtd <- function (method,
                         n_obs,
                         y_obs,
                         DU.pp = 0.95,
-                        extrasafe = F)
+                        extrasafe = FALSE)
 {
   if (!(method %in% c("BOIN", "i3+3", "mTPI2"))) {
     stop("Method must be one of: 'BOIN', 'i3+3', or 'mTPI2'")
@@ -102,7 +102,7 @@ select_mtd <- function (method,
 
       #### Find the non-DU doses ####
       adm.set = (n != 0) & (doses == 0)
-      adm.index = which(adm.set == T)
+      adm.index = which(adm.set == TRUE)
 
       y.adm = y[adm.set]
       n.adm = n[adm.set]
@@ -119,11 +119,11 @@ select_mtd <- function (method,
       ## or make the higher dose level the MTD if the ties are smaller than pT
 
       #### Find the index of the smallest diff(posterior means, pT)
-      selectd = sort(abs(phat - pT), index.return = T)$ix[1]
+      selectd = sort(abs(phat - pT), index.return = TRUE)$ix[1]
       selectdose = adm.index[selectd]
 
       ##******************* Edit Jan. 27, 2023  ************###############
-      if(extrasafe == T){
+      if(extrasafe == TRUE){
         if (method == "BOIN"){
           thres <- log((1 - pT)/(1 - EI[2]))/log(EI[2] * (1 - pT)/(pT * (1 - EI[2])))
         }
